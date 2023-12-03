@@ -61,7 +61,7 @@ void Arm::transform() {
 		TR = glm::translate(TR, glm::vec3(-move_amount_x, 0, -move_amount_z)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::rotate(TR, glm::radians(-10.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
-		TR = glm::translate(TR, glm::vec3(-0.085, -0.23, -0.015)); //--- x축으로 이동 행렬
+		TR = glm::translate(TR, glm::vec3(-0.05, -0.18, -0.05)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(-rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
 
@@ -70,7 +70,7 @@ void Arm::transform() {
 		TR = glm::translate(TR, glm::vec3(-move_amount_x, 0, -move_amount_z)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
-		TR = glm::translate(TR, glm::vec3(0.065, -0.23, -0.015)); //--- x축으로 이동 행렬
+		TR = glm::translate(TR, glm::vec3(0.04, -0.18, -0.05)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
 	}
@@ -102,18 +102,16 @@ void Leg::transform() {
 	if (is_right) {
 		TR = glm::translate(TR, glm::vec3(-move_amount_x, 0, -move_amount_z)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(10.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
-		TR = glm::translate(TR, glm::vec3(-0.04, -0.3, -0.05)); //--- x축으로 이동 행렬
-		TR = glm::rotate(TR, glm::radians(rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-		TR = glm::translate(TR, glm::vec3(0, -0.15, 0.05)); //--- x축으로 이동 행렬
+		TR = glm::translate(TR, glm::vec3(-0.02, -0.32, -0.08)); //--- x축으로 이동 행렬
+		TR = glm::rotate(TR, glm::radians(rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
 	}
 	else {
 		TR = glm::translate(TR, glm::vec3(-move_amount_x, 0, -move_amount_z)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::rotate(TR, glm::radians(-10.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
-		TR = glm::translate(TR, glm::vec3(0.04, -0.3, -0.05)); //--- x축으로 이동 행렬
-		TR = glm::rotate(TR, glm::radians(-rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-		TR = glm::translate(TR, glm::vec3(0, -0.15, 0.05)); //--- x축으로 이동 행렬
+		TR = glm::translate(TR, glm::vec3(0.02, -0.32, -0.08)); //--- x축으로 이동 행렬
+		TR = glm::rotate(TR, glm::radians(-rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
 
 	}
