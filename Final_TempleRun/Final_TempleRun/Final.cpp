@@ -1,7 +1,9 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define STB_IMAGE_IMPLEMENTATION
 #include "Header.h"
 #include "file_read.h"
 #include "Human.h"
+#include "stb_image.h"
 
 unsigned int head_vao, head_vbo[3];
 unsigned int body_vao, body_vbo[3];
@@ -33,6 +35,7 @@ GLuint shaderProgramID;
 GLuint vertexShader;
 GLuint fragmentShader;
 GLchar* vertexSource, * fragmentSource;
+GLuint texture;
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -47,17 +50,28 @@ void make_shaderProgram();
 
 /*vao, vbo 관련 함수*/
 void Initvbovao();
+void InitTexture();
 void Draw();
 
 // player객체
 Human player;
+void turn_camera();
+
 
 // 키입력 객체
 float y_rad = 0;
+float move_character[3] = { 0 };
 float move_character_z = 0;
 float move_character_x = 0;
-float rad[3]{ 0 };
+float rad[3]{ 0, 540, 0 };
+int camera_dir[3]{0, 0, 5};
 bool flip = false;
+bool interupt = false;
+int temp_rad = 0;
+bool is_a_button = false;
+
+// 임시배경 큐브
+GLuint vao, vbo[3];
 
 int main(int argc, char** argv) {
 
@@ -76,6 +90,7 @@ int main(int argc, char** argv) {
 	/*초기화 함수*/
 	make_shaderProgram();
 	Initvbovao();
+	InitTexture();
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(Keyboard);
@@ -90,7 +105,6 @@ GLvoid drawScene() {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glUseProgram(shaderProgramID);
 
@@ -99,17 +113,32 @@ GLvoid drawScene() {
 	unsigned int lightColorLocation = glGetUniformLocation(shaderProgramID, "lightColor");
 	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
 	unsigned int objColorLocation = glGetUniformLocation(shaderProgramID, "objectColor");
-	glUniform3f(objColorLocation, 1.0, 0.0, 1.0);
+	glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
 	unsigned int viewPosLocation = glGetUniformLocation(shaderProgramID, "viewPos"); //--- viewPos 값 전달: 카메라 위치
 	glUniform3f(viewPosLocation, cameraPos.x, cameraPos.y, cameraPos.z);
 	unsigned int ambient = glGetUniformLocation(shaderProgramID, "ambientLight"); //--- viewPos 값 전달: 카메라 위치
 	glUniform1f(ambient, 1);
 
+	glm::mat4 TR = glm::mat4(1.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
-
+	glm::mat4 temp_back_ground = glm::mat4(1.0f);
 	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform"); //--- 뷰잉 변환 설정
 	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform"); //--- 투영 변환 값 설정
+	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "transform"); //--- 버텍스 세이더에서 모델링 변환 위치 가져오기
+
+	// 임시 배경
+	glDisable(GL_DEPTH_TEST);
+	temp_back_ground = glm::translate(temp_back_ground, glm::vec3(0, 0, -2));
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 12, 6);
+
+	glEnable(GL_DEPTH_TEST);
+	glUniform3f(objColorLocation, 1.0, 0.0, 1.0);
 
 	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
@@ -117,59 +146,100 @@ GLvoid drawScene() {
 	projection = glm::perspective(glm::radians(30.0f), 1.0f, 0.1f, 50.0f);
 	projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2.0));
 	projection = glm::rotate(projection, glm::radians(y_rad), glm::vec3(0.0, 1.0, 0.0));
-	projection = glm::translate(projection, glm::vec3(0.0, 0.0, 1.0));
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	/*그리기*/
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	Draw();
 	glDisable(GL_BLEND);
+	Draw();
 	glutSwapBuffers(); //--- 화면에 출력하기
 }
 
 GLvoid Timer_event(int value) {
-	player.move(move_character_x, move_character_z, rad);
+	player.move(move_character, rad, false);
+	turn_camera();
+
+	
+
+
+	cameraPos.x = -move_character_x + camera_dir[0];
+	cameraPos.z = -move_character_z + camera_dir[2];
+	cameraPos.y = 1.5;
+	cameraDirection.z = -move_character_z;
+	cameraDirection.x = -move_character_x;
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
 	glutTimerFunc(100, Timer_event, 4);
 }
 
 GLvoid Keyboard(unsigned char key, int x, int y) {
-	switch (key) {
-	case 'w':
-		if (rad[0] >= 40) 
-			flip = true;
-		else if (rad[0] <= -40)
-			flip = false;
-		move_character_z += 0.1;
-		if (flip) 
-			rad[0] -= 5;
-		else
-			rad[0] += 5;
-		break;
-	case 's':
-		move_character_z -= 0.1;
-		break;
-	case 'a':
-		move_character_x += 0.1;
-		break;
-	case 'd':
-		move_character_x -= 0.1;
-		break;
-	case 'y':
-		rad[1] += 10;
-		break;
-	case 'Y':
-		rad[1] -= 10;
-		break;
-	case 'z':
-		y_rad += 10;
-		break;
-	case 'Z':
-		y_rad -= 10;
-		break;
+	if (!interupt) {
+		switch (key) {
+		case 'w':
+			if (rad[0] >= 40)
+				flip = true;
+			else if (rad[0] <= -40)
+				flip = false;
+			switch (player.return_dir()) {
+			case 0:
+				move_character_z += 0.1;
+				move_character[2] += 0.1;
+				break;
+			case -1:
+			case 3:
+				move_character_x += 0.1;
+				move_character[0] += 0.1;
+				break;
+			case 1:
+			case -3:
+				move_character_x -= 0.1;
+				move_character[0] -= 0.1;
+				break;
+			case 2:
+			case -2:
+				move_character_z -= 0.1;
+				move_character[2] -= 0.1;
+				break;
+			}
+			
+			if (flip)
+				rad[0] -= 5;
+			else
+				rad[0] += 5;
+			cout << "z: " << move_character_z << '\n';
+			break;
+		case 's':
+			move_character[2] -= 0.1;
+			move_character_z -= 0.1;
+			break;
+		case 'a':
+			player.turn(1);
+			temp_rad = rad[1];
+			is_a_button = true;
+			interupt = true;
+			break;
+		case 'd':
+			player.turn(0);
+			temp_rad = rad[1];
+			is_a_button = false;
+			interupt = true;
+			break;
+		case 'y':
+			rad[1] += 10;
+			break;
+		case 'Y':
+			rad[1] -= 10;
+			break;
+		case 'z':
+			y_rad += 10;
+			break;
+		case 'Z':
+			y_rad -= 10;
+			break;
+		}
 	}
-	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
 
 }
 
@@ -180,6 +250,21 @@ void Draw() {
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "transform"); //--- 버텍스 세이더에서 모델링 변환 위치 가져오기
 	player.draw(head_vao, body_vao, right_arm_vao, left_arm_vao, right_leg_vao, left_leg_vao, modelLocation);
 }
+
+void InitTexture()
+{
+	int widthImage, heightImage, numberOfChannel;
+	glGenTextures(1, &texture); //--- 텍스처 생성
+	glBindTexture(GL_TEXTURE_2D, texture); //--- 텍스처 바인딩
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	stbi_set_flip_vertically_on_load (true); 
+	unsigned char* data = stbi_load("temp_city.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
+}
+
 
 GLvoid Reshape(int w, int h) {
 	glViewport(0, 0, w, h);
@@ -243,6 +328,102 @@ void make_fragmentShaders()
 	}
 }
 
+void turn_camera() {
+	if (is_a_button) {
+		switch (player.return_dir()) {
+		case 0:
+			if (rad[1] < temp_rad + 90 and interupt) {
+				camera_dir[0] += 1;
+				camera_dir[2] += 1;
+				rad[1] += 18;
+			}
+			else {
+				interupt = false;
+				rad[1] = 540;
+			}
+			break;
+		case -1:
+			if (rad[1] < temp_rad + 90 and interupt) {
+				camera_dir[0] += 1;
+				camera_dir[2] -= 1;
+				rad[1] += 18;
+			}
+			else {
+				interupt = false;
+			}
+			break;
+		case -2:
+		case 2:
+			if (rad[1] < temp_rad + 90 and interupt) {
+				camera_dir[0] -= 1;
+				camera_dir[2] -= 1;
+				rad[1] += 18;
+			}
+			else {
+				interupt = false;
+			}
+			break;
+		case -3:
+		case 1:
+			if (rad[1] < temp_rad + 90 and interupt) {
+				camera_dir[0] -= 1;
+				camera_dir[2] += 1;
+				rad[1] += 18;
+			}
+			else {
+				interupt = false;
+			}
+			break;
+		}
+	}
+	else {
+		switch (player.return_dir()) {
+		case 0:
+			if (rad[1] > temp_rad - 90 and interupt) {
+				camera_dir[0] -= 1;
+				camera_dir[2] += 1;
+				rad[1] -= 18;
+			}
+			else {
+				interupt = false;
+				rad[1] = 540;
+			}
+			break;
+		case 1:
+			if (rad[1] > temp_rad - 90 and interupt) {
+				camera_dir[0] -= 1;
+				camera_dir[2] -= 1;
+				rad[1] -= 18;
+			}
+			else {
+				interupt = false;
+			}
+			break;
+		case 2:
+		case -2:
+			if (rad[1] > temp_rad - 90 and interupt) {
+				camera_dir[0] += 1;
+				camera_dir[2] -= 1;
+				rad[1] -= 18;
+			}
+			else {
+				interupt = false;
+			}
+			break;
+		case 3:
+		case -1:
+			if (rad[1] > temp_rad - 90 and interupt) {
+				camera_dir[0] += 1;
+				camera_dir[2] += 1;
+				rad[1] -= 18;
+			}
+			else {
+				interupt = false;
+			}
+			break;
+		}
+	}
+}
 
 void Initvbovao()
 {
@@ -351,5 +532,26 @@ void Initvbovao()
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+
+	Load_Object("cube.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(3, vbo);
+	glBindVertexArray(vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
 }

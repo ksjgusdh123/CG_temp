@@ -3,50 +3,46 @@
 
 class Head {
 	glm::mat4 TR{ glm::mat4(1.0f) };
-	float move_amount_x;
-	float move_amount_z;
+	float move[3];
 	float rad[3];
 public:
 	void draw(GLuint, unsigned int);
 	void transform();
-	void get_move(float, float, float*);
+	void get_move(float*, float*, bool);
 };	
 
 class Arm {
 	glm::mat4 TR{ glm::mat4(1.0f) };
 	bool is_right;
-	float move_amount_x;
-	float move_amount_z;
+	float move[3];
 	float rad[3];
 public:
 	void draw(GLuint, unsigned int);
 	void check_right(int i);
 	void transform();
-	void get_move(float, float, float*);
+	void get_move(float*, float*, bool);
 };
 
 class Leg {
 	glm::mat4 TR{ glm::mat4(1.0f) };
 	bool is_right;
-	float move_amount_x;
-	float move_amount_z;
+	float move[3];
 	float rad[3];
 public:
 	void draw(GLuint, unsigned int);
 	void check_right(int i);
 	void transform();
-	void get_move(float, float, float*);
+	void get_move(float*, float*, bool);
 };
 
 class Body {
 	glm::mat4 TR{ glm::mat4(1.0f) };
-	float move_amount_x;
-	float move_amount_z;
+	float move[3];
 	float rad[3];
 public:
 	void draw(GLuint, unsigned int);
 	void transform();
-	void get_move(float, float, float*);
+	void get_move(float*, float*, bool);
 };
 
 class Human {
@@ -56,11 +52,13 @@ class Human {
 	Arm right_arm;
 	Leg left_leg;
 	Leg right_leg;	
-	float move_amount_x;
-	float move_amount_z;
+	int dir;
 	float rad[3];
+	bool slide;
 public:
 	Human();
 	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation);
-	void move(float amount_x, float amount_z, float* rad);
+	void move(float* move_amount, float* rad, bool slide);
+	void turn(int i);
+	int return_dir();
 };

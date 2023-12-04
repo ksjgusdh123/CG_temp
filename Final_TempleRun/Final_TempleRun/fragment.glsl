@@ -4,7 +4,7 @@ in vec3 passColorAttribute;
 in vec3 FragPos;
 in vec3 Normal;
 in mat4 trans;
-
+in vec2 TexCoord;
 out vec4 fragmentColor;
 
 uniform vec3 objectColor;
@@ -36,7 +36,7 @@ void main()
     float dist = distance(lightPos, FragPos);
     vec3 result = ambient * objectColor + (diffuse + specular) * (objectColor / (dist * dist));
 
-    fragmentColor = vec4(result, 0.4);
-    //fragmentColor = texture(outTexture, TexCoord) * fragmentColor;
+    fragmentColor = vec4(result, 0.5);
+    fragmentColor = texture(outTexture, TexCoord) * fragmentColor;
 
 }
