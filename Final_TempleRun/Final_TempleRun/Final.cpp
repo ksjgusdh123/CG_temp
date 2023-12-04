@@ -4,6 +4,7 @@
 #include "file_read.h"
 #include "Human.h"
 #include "stb_image.h"
+#include "map.h"
 
 unsigned int head_vao, head_vbo[3];
 unsigned int body_vao, body_vbo[3];
@@ -60,6 +61,9 @@ void Draw();
 Human player;
 void turn_camera();
 
+// map객체
+Road road;
+std::vector<Road> roads;
 
 // 키입력 객체
 float y_rad = 0;
@@ -155,9 +159,15 @@ GLvoid drawScene() {
 	projection = glm::perspective(glm::radians(30.0f), 1.0f, 0.1f, 50.0f);
 	projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2.0));
 	projection = glm::rotate(projection, glm::radians(y_rad), glm::vec3(0.0, 1.0, 0.0));
+	TR = glm::translate(TR, glm::vec3(0.0, -1.7, 0.0));
+
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	for (int i = 0; i < roads.size(); ++i) {
+		roads.at(i).draw(vao, modelLocation);
+	}
 
 	/*그리기*/
 
@@ -172,6 +182,14 @@ GLvoid drawScene() {
 GLvoid Timer_event(int value) {
 	player.move(move_character, rad, is_slide);
 	turn_camera();
+
+	// 임시적으로 맵 생성
+	if (roads.size() == 0) {
+		for (int i = 0; i < 10; ++i) {
+			roads.push_back(road);
+			roads.at(i).select_pos(i);
+		}
+	}
 
 	// 게임 시작시 자동으로 이동
 	if (game_start) {
@@ -238,7 +256,6 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		case 'p':
 			game_start = true;
 			break;
-			
 		case 'w':
 			if (rad[0] >= 90)
 				flip = true;
@@ -261,7 +278,6 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 				move_character[2] -= 0.1;
 				break;
 			}
-			
 			if (flip)
 				rad[0] -= 5;
 			else
@@ -295,9 +311,6 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			break;
 		case 'Z':
 			y_rad -= 10;
-			break;
-		case 'j':
-			
 			break;
 		}
 	}
@@ -379,8 +392,8 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	stbi_set_flip_vertically_on_load (true); 
-	unsigned char* data = stbi_load("rightleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, widthImage, heightImage, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
+	unsigned char* data = stbi_load("temp_city.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 
 	glGenTextures(1, &leg_texture); //--- 텍스처 생성
 	glBindTexture(GL_TEXTURE_2D, leg_texture); //--- 텍스처 바인딩

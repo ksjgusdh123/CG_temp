@@ -17,5 +17,6 @@
 #include <iterator>
 #include <conio.h>
 #include <time.h>
+#include <vector>
 
 using namespace std;

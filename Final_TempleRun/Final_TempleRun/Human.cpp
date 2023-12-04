@@ -33,7 +33,7 @@ void Head::get_move(float* move_amount, float* get_rad, bool slide) {
 		rad[i] = get_rad[i];
 	}
 	is_slide = slide;
-
+		
 }
 
 void Body::transform() {
