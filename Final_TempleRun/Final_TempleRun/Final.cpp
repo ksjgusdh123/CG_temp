@@ -36,6 +36,7 @@ GLuint vertexShader;
 GLuint fragmentShader;
 GLchar* vertexSource, * fragmentSource;
 GLuint texture;
+GLuint leg_texture;
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -157,9 +158,11 @@ GLvoid drawScene() {
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	/*그리기*/
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
+
 	Draw();
 	glutSwapBuffers(); //--- 화면에 출력하기
 }
@@ -192,9 +195,9 @@ GLvoid Timer_event(int value) {
 			break;
 		}
 
-		if (flip && !is_jump)
+		if (flip && !is_jump && !is_slide)
 			rad[0] -= 5;
-		else if(!flip && !is_jump)
+		else if(!flip && !is_jump && !is_slide)
 			rad[0] += 5;
 		cout << "z: " << move_character_z << '\n';
 	}
@@ -230,17 +233,16 @@ GLvoid Timer_event(int value) {
 GLvoid Keyboard(unsigned char key, int x, int y) {
 	if (!interupt) {
 		switch (key) {
-		case '1':
-			
-			break;
-		case '2':
-			
-			break;
 		case 'p':
 			game_start = true;
 			break;
 		case 'k':
 			is_slide = true;
+			rad[0] = -90;
+			break;
+		case 'u':
+			is_slide = false;
+			rad[0] = 0;
 			break;
 		case 'w':
 			if (rad[0] >= 90)
@@ -354,7 +356,7 @@ void Draw() {
 	int ColorLocation = glGetAttribLocation(shaderProgramID, "in_Color");
 
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "transform"); //--- 버텍스 세이더에서 모델링 변환 위치 가져오기
-	player.draw(head_vao, body_vao, right_arm_vao, left_arm_vao, right_leg_vao, left_leg_vao, modelLocation);
+	player.draw(head_vao, body_vao, right_arm_vao, left_arm_vao, right_leg_vao, left_leg_vao, modelLocation, leg_texture);
 }
 
 void InitTexture()
@@ -367,8 +369,18 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	stbi_set_flip_vertically_on_load (true); 
-	unsigned char* data = stbi_load("temp_city.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
+	unsigned char* data = stbi_load("rightleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, widthImage, heightImage, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
+
+	glGenTextures(1, &leg_texture); //--- 텍스처 생성
+	glBindTexture(GL_TEXTURE_2D, leg_texture); //--- 텍스처 바인딩
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	stbi_set_flip_vertically_on_load(true);
+	data = stbi_load("rightleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, widthImage, heightImage, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 }
 
 
@@ -661,3 +673,6 @@ void Initvbovao()
 	glEnableVertexAttribArray(2);
 
 }
+
+
+
