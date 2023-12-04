@@ -18,8 +18,9 @@ void Head::draw(GLuint vao, unsigned int modelLocation) {
 }
 
 void Head::get_move(float* move_amount, float* get_rad, bool slide) {
-	move[0] = move_amount[0];
-	move[2] = move_amount[2];
+	for (int i = 0; i < 3; ++i) {
+		move[i] = move_amount[i];
+	}
 
 	for (int i = 0; i < 3; ++i) {
 		rad[i] = get_rad[i];
@@ -51,8 +52,10 @@ void Body::draw(GLuint vao, unsigned int modelLocation) {
 }
 
 void Body::get_move(float* move_amount, float* get_rad, bool slide) {
-	move[0] = move_amount[0];
-	move[2] = move_amount[2];
+	for (int i = 0; i < 3; ++i) {
+		move[i] = move_amount[i];
+	}
+
 	for (int i = 0; i < 3; ++i) {
 		rad[i] = get_rad[i];
 		if (slide) {
@@ -103,8 +106,9 @@ void Arm::draw(GLuint vao, unsigned int modelLocation) {
 }
 
 void Arm::get_move(float* move_amount, float* get_rad, bool slide) {
-	move[0] = move_amount[0];
-	move[2] = move_amount[2];
+	for (int i = 0; i < 3; ++i) {
+		move[i] = move_amount[i];
+	}
 	for (int i = 0; i < 3; ++i) {
 		rad[i] = get_rad[i];
 		if (slide) {
@@ -153,8 +157,9 @@ void Leg::draw(GLuint vao, unsigned int modelLocation) {
 }
 
 void Leg::get_move(float* move_amount, float* get_rad, bool slide) {
-	move[0] = move_amount[0];
-	move[2] = move_amount[2];
+	for (int i = 0; i < 3; ++i) {
+		move[i] = move_amount[i];
+	}
 	for (int i = 0; i < 3; ++i) {
 		rad[i] = get_rad[i];
 		if(slide) {

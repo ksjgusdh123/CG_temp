@@ -69,6 +69,9 @@ bool flip = false;
 bool interupt = false;
 int temp_rad = 0;
 bool is_a_button = false;
+bool is_jump = false;
+bool jump_flip = false;
+bool game_start = false;
 
 // 임시배경 큐브
 GLuint vao, vbo[3];
@@ -162,14 +165,63 @@ GLvoid Timer_event(int value) {
 	player.move(move_character, rad, false);
 	turn_camera();
 
-	
+	// 게임 시작시 자동으로 이동
+	if (game_start) {
+		if (rad[0] >= 40)
+			flip = true;
+		else if (rad[0] <= -40)
+			flip = false;
+		switch (player.return_dir()) {
+		case 0:
+			move_character_z += 0.1;
+			move_character[2] += 0.1;
+			break;
+		case -1:
+		case 3:
+			move_character_x += 0.1;
+			move_character[0] += 0.1;
+			break;
+		case 1:
+		case -3:
+			move_character_x -= 0.1;
+			move_character[0] -= 0.1;
+			break;
+		case 2:
+		case -2:
+			move_character_z -= 0.1;
+			move_character[2] -= 0.1;
+			break;
+		}
 
+		if (flip && !is_jump)
+			rad[0] -= 5;
+		else if(!flip && !is_jump)
+			rad[0] += 5;
+		cout << "z: " << move_character_z << '\n';
+	}
 
-	cameraPos.x = -move_character_x + camera_dir[0];
-	cameraPos.z = -move_character_z + camera_dir[2];
+	// 점프
+	if (is_jump) {
+		if (jump_flip) {
+			move_character[1] -= 0.2;
+			if (move_character[1] <= 0) {
+				move_character[1] = 0;
+				jump_flip = false;
+				is_jump = false;
+			}
+		}
+		else {
+			move_character[1] += 0.2;
+			if (move_character[1] >= 1)
+				jump_flip = true;
+		}
+	}
+
+	cameraPos.x = -move_character[0] + camera_dir[0];
+	cameraPos.z = -move_character[2] + camera_dir[2];
 	cameraPos.y = 1.5;
-	cameraDirection.z = -move_character_z;
-	cameraDirection.x = -move_character_x;
+	cameraDirection.z = -move_character[2];
+	cameraDirection.x = -move_character[0];
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
 	glutTimerFunc(100, Timer_event, 4);
 }
@@ -177,6 +229,9 @@ GLvoid Timer_event(int value) {
 GLvoid Keyboard(unsigned char key, int x, int y) {
 	if (!interupt) {
 		switch (key) {
+		case 'p':
+			game_start = true;
+			break;
 		case 'w':
 			if (rad[0] >= 40)
 				flip = true;
@@ -237,6 +292,10 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			break;
 		case 'Z':
 			y_rad -= 10;
+			break;
+		case 'j':
+			if(is_jump == false)
+				is_jump = true;
 			break;
 		}
 	}
