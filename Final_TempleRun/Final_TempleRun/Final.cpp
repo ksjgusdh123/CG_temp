@@ -38,6 +38,7 @@ GLuint fragmentShader;
 GLchar* vertexSource, * fragmentSource;
 GLuint texture;
 GLuint leg_texture;
+GLuint road_texture;
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -151,7 +152,6 @@ GLvoid drawScene() {
 	glDrawArrays(GL_TRIANGLES, 12, 6);
 
 	glEnable(GL_DEPTH_TEST);
-	glUniform3f(objColorLocation, 1.0, 0.0, 1.0);
 
 	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
@@ -165,12 +165,12 @@ GLvoid drawScene() {
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
+	glBindTexture(GL_TEXTURE_2D, road_texture);
 	for (int i = 0; i < roads.size(); ++i) {
 		roads.at(i).draw(vao, modelLocation);
 	}
-
+	glBindTexture(GL_TEXTURE_2D, leg_texture);
 	/*그리기*/
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
@@ -185,9 +185,23 @@ GLvoid Timer_event(int value) {
 
 	// 임시적으로 맵 생성
 	if (roads.size() == 0) {
-		for (int i = 0; i < 10; ++i) {
+		for (int i = 0; i < 40; ++i) {
 			roads.push_back(road);
-			roads.at(i).select_pos(i);
+			roads.at(i).select_pos(-i);
+		}
+	}
+
+	// 도로 삭제 검사
+	if (roads.size() != 0) {
+		for (int i = 0; i < roads.size(); ++i) {
+			roads.at(i).player_distance(move_character);
+		}
+		for (int i = 0; i < roads.size(); ++i) {
+			if (roads.at(i).return_is_delete()) {
+				road.select_pos(roads.at(i).return_pos() - 40);
+				roads.push_back(road);
+				roads.erase(roads.begin() + i);
+			}
 		}
 	}
 
@@ -216,10 +230,10 @@ GLvoid Timer_event(int value) {
 		}
 
 		if (flip && !is_jump && !is_slide)
-			rad[0] -= 5;
+			rad[0] -= 10;
 		else if(!flip && !is_jump && !is_slide)
-			rad[0] += 5;
-		cout << "z: " << move_character_z << '\n';
+			rad[0] += 10;
+		cout << "z: " << move_character[2] << '\n';
 	}
 
 	// 점프
@@ -404,6 +418,16 @@ void InitTexture()
 	stbi_set_flip_vertically_on_load(true);
 	data = stbi_load("rightleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, widthImage, heightImage, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
+
+	glGenTextures(1, &road_texture); //--- 텍스처 생성
+	glBindTexture(GL_TEXTURE_2D, road_texture); //--- 텍스처 바인딩
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	stbi_set_flip_vertically_on_load(true);
+	data = stbi_load("temp_road3.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 }
 
 
