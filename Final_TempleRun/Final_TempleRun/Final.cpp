@@ -156,13 +156,9 @@ GLvoid drawScene() {
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
 	projection = glm::perspective(glm::radians(30.0f), 1.0f, 0.1f, 50.0f);
-	projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2.0));
+	projection = glm::translate(projection, glm::vec3(0.0, 0.0, -5.0));
 	projection = glm::rotate(projection, glm::radians(y_rad), glm::vec3(0.0, 1.0, 0.0));
-	TR = glm::translate(TR, glm::vec3(0.0, -1.7, 0.0));
-
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
-	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	glBindTexture(GL_TEXTURE_2D, road_texture);
 	for (int i = 0; i < roads.size(); ++i) {
@@ -186,7 +182,7 @@ GLvoid Timer_event(int value) {
 	if (roads.size() == 0) {
 		for (int i = 0; i < 40; ++i) {
 			roads.push_back(road);
-			roads.at(i).select_pos(-i);
+			roads.at(i).select_pos(0, -i);
 		}
 	}
 
@@ -197,7 +193,10 @@ GLvoid Timer_event(int value) {
 		}
 		for (int i = 0; i < roads.size(); ++i) {
 			if (roads.at(i).return_is_delete()) {
-				road.select_pos((roads.at(i).return_pos())[2] - 40);
+				//road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 1); // 앞으로 생성
+				road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 1, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
+				//road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 1, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
+
 				roads.push_back(road);
 				roads.erase(roads.begin() + i);
 			}
@@ -257,10 +256,10 @@ GLvoid Timer_event(int value) {
 	player.road_check(move_character);
 
 	cameraPos.x = -move_character[0] + camera_dir[0];
-	cameraPos.z = -move_character[2] + camera_dir[2];
 	cameraPos.y = 1.5;
-	cameraDirection.z = -move_character[2];
+	cameraPos.z = -move_character[2] + camera_dir[2];
 	cameraDirection.x = -move_character[0];
+	cameraDirection.z = -move_character[2];
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
 	glutTimerFunc(100, Timer_event, 4);
 }
