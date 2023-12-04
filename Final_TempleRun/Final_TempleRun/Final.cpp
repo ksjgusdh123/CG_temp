@@ -192,7 +192,7 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 				move_character_x += 0.1;
 				move_character[0] += 0.1;
 				break;
-			case 1:
+			case 1: 
 			case -3:
 				move_character_x -= 0.1;
 				move_character[0] -= 0.1;
