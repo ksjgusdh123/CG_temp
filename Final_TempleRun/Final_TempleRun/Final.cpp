@@ -44,6 +44,7 @@ GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid Timer_event(int value);
 void SpecialKeyboard(int key, int x, int y);
+void specialKeyUpCallback(int key, int x, int y);
 
 /*셰이더 관련 함수*/
 void make_vertexShaders();
@@ -101,6 +102,7 @@ int main(int argc, char** argv) {
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(Keyboard);
 	glutSpecialFunc(SpecialKeyboard);
+	glutSpecialUpFunc(specialKeyUpCallback);
 	glutTimerFunc(100, Timer_event, 4);
 	glutMainLoop();
 
@@ -236,14 +238,7 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		case 'p':
 			game_start = true;
 			break;
-		case 'k':
-			is_slide = true;
-			rad[0] = -90;
-			break;
-		case 'u':
-			is_slide = false;
-			rad[0] = 0;
-			break;
+			
 		case 'w':
 			if (rad[0] >= 90)
 				flip = true;
@@ -302,8 +297,7 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			y_rad -= 10;
 			break;
 		case 'j':
-			if(is_jump == false)
-				is_jump = true;
+			
 			break;
 		}
 	}
@@ -349,7 +343,23 @@ void SpecialKeyboard(int key, int x, int y) {
 			break;
 		}
 	}
+	else if (key == GLUT_KEY_DOWN) {
+		is_slide = true;
+		rad[0] = -90;
+	}
+	else if (key == GLUT_KEY_UP) {
+		if (is_jump == false)
+			is_jump = true;
+	}
 }
+
+void specialKeyUpCallback(int key, int x, int y) {
+	if (key == GLUT_KEY_DOWN) {
+		is_slide = false;
+		rad[0] = 0;
+	}
+}
+
 
 void Draw() {
 	int PosLocation = glGetAttribLocation(shaderProgramID, "in_Position");
