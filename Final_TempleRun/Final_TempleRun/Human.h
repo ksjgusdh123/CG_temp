@@ -39,6 +39,7 @@ class Body {
 	glm::mat4 TR{ glm::mat4(1.0f) };
 	float move[3];
 	float rad[3];
+	bool is_slide;
 public:
 	void draw(GLuint, unsigned int);
 	void transform();
@@ -53,6 +54,7 @@ class Human {
 	Leg left_leg;
 	Leg right_leg;	
 	int dir;
+	float speed{ 0.3 };
 	float rad[3];
 	bool slide;
 public:
@@ -61,4 +63,5 @@ public:
 	void move(float* move_amount, float* rad, bool slide);
 	void turn(int i);
 	int return_dir();
+	float get_speed();
 };

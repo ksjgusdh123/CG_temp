@@ -42,6 +42,7 @@ GLvoid drawScene();
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid Timer_event(int value);
+void SpecialKeyboard(int key, int x, int y);
 
 /*셰이더 관련 함수*/
 void make_vertexShaders();
@@ -72,6 +73,7 @@ bool is_a_button = false;
 bool is_jump = false;
 bool jump_flip = false;
 bool game_start = false;
+bool is_slide = false;
 
 // 임시배경 큐브
 GLuint vao, vbo[3];
@@ -97,6 +99,7 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(Keyboard);
+	glutSpecialFunc(SpecialKeyboard);
 	glutTimerFunc(100, Timer_event, 4);
 	glutMainLoop();
 
@@ -162,7 +165,7 @@ GLvoid drawScene() {
 }
 
 GLvoid Timer_event(int value) {
-	player.move(move_character, rad, false);
+	player.move(move_character, rad, is_slide);
 	turn_camera();
 
 	// 게임 시작시 자동으로 이동
@@ -173,23 +176,19 @@ GLvoid Timer_event(int value) {
 			flip = false;
 		switch (player.return_dir()) {
 		case 0:
-			move_character_z += 0.1;
-			move_character[2] += 0.1;
+			move_character[2] += player.get_speed();
 			break;
 		case -1:
 		case 3:
-			move_character_x += 0.1;
-			move_character[0] += 0.1;
+			move_character[0] += player.get_speed();
 			break;
 		case 1:
 		case -3:
-			move_character_x -= 0.1;
-			move_character[0] -= 0.1;
+			move_character[0] -= player.get_speed();
 			break;
 		case 2:
 		case -2:
-			move_character_z -= 0.1;
-			move_character[2] -= 0.1;
+			move_character[2] -= player.get_speed();
 			break;
 		}
 
@@ -208,12 +207,14 @@ GLvoid Timer_event(int value) {
 				move_character[1] = 0;
 				jump_flip = false;
 				is_jump = false;
+				rad[0] = 40;
 			}
 		}
 		else {
 			move_character[1] += 0.2;
 			if (move_character[1] >= 1)
 				jump_flip = true;
+			rad[0] = 80;
 		}
 	}
 
@@ -229,32 +230,37 @@ GLvoid Timer_event(int value) {
 GLvoid Keyboard(unsigned char key, int x, int y) {
 	if (!interupt) {
 		switch (key) {
+		case '1':
+			
+			break;
+		case '2':
+			
+			break;
 		case 'p':
 			game_start = true;
 			break;
+		case 'k':
+			is_slide = true;
+			break;
 		case 'w':
-			if (rad[0] >= 40)
+			if (rad[0] >= 90)
 				flip = true;
-			else if (rad[0] <= -40)
+			else if (rad[0] <= -90)
 				flip = false;
 			switch (player.return_dir()) {
 			case 0:
-				move_character_z += 0.1;
 				move_character[2] += 0.1;
 				break;
 			case -1:
 			case 3:
-				move_character_x += 0.1;
 				move_character[0] += 0.1;
 				break;
 			case 1: 
 			case -3:
-				move_character_x -= 0.1;
 				move_character[0] -= 0.1;
 				break;
 			case 2:
 			case -2:
-				move_character_z -= 0.1;
 				move_character[2] -= 0.1;
 				break;
 			}
@@ -300,6 +306,47 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		}
 	}
 
+}
+
+void SpecialKeyboard(int key, int x, int y) {
+	if (key == GLUT_KEY_RIGHT) {
+		switch (player.return_dir()) {
+		case 0:
+			move_character[0] -= 0.1;
+			break;
+		case -1:
+		case 3:
+			move_character[2] += 0.1;
+			break;
+		case 1:
+		case -3:
+			move_character[2] -= 0.1;
+			break;
+		case 2:
+		case -2:
+			move_character[0] += 0.1;
+			break;
+		}
+	}
+	else if (key == GLUT_KEY_LEFT) {
+		switch (player.return_dir()) {
+		case 0:
+			move_character[0] += 0.1;
+			break;
+		case -1:
+		case 3:
+			move_character[2] -= 0.1;
+			break;
+		case 1:
+		case -3:
+			move_character[2] += 0.1;
+			break;
+		case 2:
+		case -2:
+			move_character[0] -= 0.1;
+			break;
+		}
+	}
 }
 
 void Draw() {

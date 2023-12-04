@@ -4,9 +4,9 @@
 void Head::transform() {
 	TR = glm::mat4(1.0f);
 	TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
+	//TR = glm::rotate(TR, glm::radians(rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 	TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 	TR = glm::translate(TR, glm::vec3(0, -0.34, -0.075)); //--- x축으로 이동 행렬
-	TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 	TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
 }
 
@@ -36,11 +36,19 @@ void Head::get_move(float* move_amount, float* get_rad, bool slide) {
 
 void Body::transform() {
 	TR = glm::mat4(1.0f);
-	TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
-	TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
-	TR = glm::translate(TR, glm::vec3(0, -0.24, -0.075)); //--- x축으로 이동 행렬
-	TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-	TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+	if (is_slide) {
+		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
+		TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
+		TR = glm::translate(TR, glm::vec3(0, -0.24, -0.075)); //--- x축으로 이동 행렬
+		TR = glm::rotate(TR, glm::radians(rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
+		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+	}
+	else {
+		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
+		TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
+		TR = glm::translate(TR, glm::vec3(0, -0.24, -0.075)); //--- x축으로 이동 행렬
+		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+	}
 }
 
 void Body::draw(GLuint vao, unsigned int modelLocation) {
@@ -59,6 +67,7 @@ void Body::get_move(float* move_amount, float* get_rad, bool slide) {
 	for (int i = 0; i < 3; ++i) {
 		rad[i] = get_rad[i];
 		if (slide) {
+			is_slide = slide;
 			if (i == 0)
 				rad[i] = 90;
 			else
@@ -77,16 +86,16 @@ void Arm::transform() {
 	TR = glm::mat4(1.0f);
 	if (is_right) {
 		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
-		TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
+		//TR = glm::rotate(TR, glm::radians(rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::rotate(TR, glm::radians(-10.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(-0.08, -0.15, -0.08)); //--- x축으로 이동 행렬
-		TR = glm::rotate(TR, glm::radians(-rad[0] + 60), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
+		TR = glm::rotate(TR, glm::radians(-rad[0] + 10), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
 
 	}
 	else {
 		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
-		TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
+		//TR = glm::rotate(TR, glm::radians(rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(0.08, -0.15, -0.1)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(rad[0] + 60), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
@@ -113,7 +122,7 @@ void Arm::get_move(float* move_amount, float* get_rad, bool slide) {
 		rad[i] = get_rad[i];
 		if (slide) {
 			if (i == 0)
-				rad[i] = 90;
+				rad[i] = -90;
 			else
 				rad[i] = 0;
 		}
@@ -131,6 +140,7 @@ void Leg::transform() {
 	TR = glm::mat4(1.0f);
 	if (is_right) {
 		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
+		//TR = glm::rotate(TR, glm::radians(rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::rotate(TR, glm::radians(10.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(-0.02, -0.32, -0.1)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(6.f), glm::vec3(0.0, 0.0, 1.0)); //--- x축에 대하여 회전 행렬
@@ -139,7 +149,7 @@ void Leg::transform() {
 	}
 	else {
 		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
-		TR = glm::rotate(TR, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
+		//TR = glm::rotate(TR, glm::radians(rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 		TR = glm::rotate(TR, glm::radians(-10.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(0.02, -0.32, -0.1)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(-6.f), glm::vec3(0.0, 0.0, 1.0)); //--- x축에 대하여 회전 행렬
@@ -208,3 +218,5 @@ void Human::turn(int i) {
 }
 
 int Human::return_dir() { return dir; }
+
+float Human::get_speed() { return speed; }
