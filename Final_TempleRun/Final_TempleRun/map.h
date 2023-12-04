@@ -1,6 +1,5 @@
 #pragma once
 #include "Header.h"
-#include "Human.h"
 class Road {
 	glm::mat4 TR{ glm::mat4(1.0f) };
 	float pos[3];
@@ -11,5 +10,7 @@ public:
 	void draw(GLuint, unsigned int);
 	void player_distance(float*);
 	bool return_is_delete();
-	float return_pos();
+	float* return_pos();
 };
+
+extern std::vector<Road> roads;

@@ -64,7 +64,6 @@ void turn_camera();
 
 // map°´Ã¼
 Road road;
-std::vector<Road> roads;
 
 // Å°ÀÔ·Â °´Ã¼
 float y_rad = 0;
@@ -198,7 +197,7 @@ GLvoid Timer_event(int value) {
 		}
 		for (int i = 0; i < roads.size(); ++i) {
 			if (roads.at(i).return_is_delete()) {
-				road.select_pos(roads.at(i).return_pos() - 40);
+				road.select_pos((roads.at(i).return_pos())[2] - 40);
 				roads.push_back(road);
 				roads.erase(roads.begin() + i);
 			}
@@ -254,6 +253,8 @@ GLvoid Timer_event(int value) {
 			rad[0] = 80;
 		}
 	}
+	move_character[1] -= 0.05;
+	player.road_check(move_character);
 
 	cameraPos.x = -move_character[0] + camera_dir[0];
 	cameraPos.z = -move_character[2] + camera_dir[2];

@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "map.h"
 
+std::vector<Road> roads;
 
 void Road::select_pos(int n) {
 	pos[2] = n;
@@ -29,6 +30,6 @@ bool Road::return_is_delete() {
 	return is_delete;
 }
 
-float Road::return_pos() {
-	return pos[2];
+float* Road::return_pos() {
+	return pos;
 }

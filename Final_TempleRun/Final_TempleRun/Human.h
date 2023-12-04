@@ -1,6 +1,6 @@
 #pragma once
 #include "Header.h"
-
+#include "map.h"
 class Part {
 protected:
 	glm::mat4 TR{ glm::mat4(1.0f) };
@@ -59,4 +59,5 @@ public:
 	void turn(int i);
 	int return_dir();
 	float get_speed();
+	void road_check(float* move_amount);
 };

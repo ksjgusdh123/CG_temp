@@ -162,7 +162,7 @@ void Leg::transform() {
 			TR = glm::rotate(TR, glm::radians(rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
 		}
-	
+
 	}
 	else {
 		if (is_slide) {
@@ -186,8 +186,8 @@ void Leg::transform() {
 
 void Leg::draw(GLuint vao, unsigned int modelLocation, GLuint leg_texture) {
 	Leg::transform();
-	if(is_right)
-		glBindTexture(GL_TEXTURE_2D, leg_texture);	
+	if (is_right)
+		glBindTexture(GL_TEXTURE_2D, leg_texture);
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, 850);
@@ -232,10 +232,10 @@ void Human::move(float* move_amount, float* rad, bool slide) {
 
 void Human::turn(int i) {
 	if (i == 0) {
-			dir += 1;
+		dir += 1;
 	}
 	else {
-			dir -= 1;
+		dir -= 1;
 	}
 	dir = dir % 4;
 }
@@ -243,3 +243,15 @@ void Human::turn(int i) {
 int Human::return_dir() { return dir; }
 
 float Human::get_speed() { return speed; }
+
+void Human::road_check(float* move_amount) {
+	for (int i = 0; i < roads.size(); ++i) {
+		if ((roads.at(i).return_pos())[0] - 1.5 < move_amount[0] && (roads.at(i).return_pos())[0] + 1.5 > move_amount[0]
+			&& -(roads.at(i).return_pos())[2] - 1.5 < move_amount[2] && -(roads.at(i).return_pos())[2] + 1.5 > move_amount[2]
+			&& (-0.1 <= move_amount[1])){
+			std::cout << "허거" << endl;
+			if(move_amount[1] < 0)
+				move_amount[1] = 0;
+		}
+	}
+}
