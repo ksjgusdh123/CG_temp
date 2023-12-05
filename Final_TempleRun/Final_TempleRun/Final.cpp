@@ -5,6 +5,15 @@
 #include "Human.h"
 #include "stb_image.h"
 #include "map.h"
+#include "inc/fmod.hpp"
+#include "inc/fmod_errors.h"
+#pragma comment(lib, "fmod_vc.lib")
+
+FMOD::System* ssystem;
+FMOD::Sound* sound1, * sound2;
+FMOD::Channel* channel = 0;
+FMOD_RESULT result;
+void* extradriverdata = 0;
 
 random_device rd;
 std::mt19937 dre(rd());
@@ -71,6 +80,10 @@ Road road;
 int delete_num = 0;
 int map_dir = 0;
 
+// 사운드
+void sound_init();
+
+
 // 키입력 객체
 float y_rad = 0;
 float move_character[3] = { 0 };
@@ -86,6 +99,7 @@ bool is_jump = false;
 bool jump_flip = false;
 bool game_start = false;
 bool is_slide = false;
+float ambient_amount = 0.5;
 
 // 임시배경 큐브
 GLuint vao, vbo[3];
@@ -93,7 +107,7 @@ GLuint vao, vbo[3];
 int main(int argc, char** argv) {
 
 	srand(time(NULL));
-
+	result = FMOD::System_Create(&ssystem);
 	glutInit(&argc, argv);
 	width = 800, height = 600;
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -106,6 +120,7 @@ int main(int argc, char** argv) {
 
 	/*초기화 함수*/
 	make_shaderProgram();
+	sound_init();
 	Initvbovao();
 	InitTexture();
 	glutDisplayFunc(drawScene);
@@ -113,10 +128,20 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(Keyboard);
 	glutSpecialFunc(SpecialKeyboard);
 	glutSpecialUpFunc(specialKeyUpCallback);
+	channel->stop();
+	channel->setVolume(1.0);
+	ssystem->update();
+	ssystem->playSound(sound1, 0, false, &channel);
 	glutTimerFunc(100, Timer_event, 4);
 	glutMainLoop();
 
 	return 0;
+}
+
+void sound_init() {
+	ssystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
+	ssystem->createSound("main_bgm.mp3", FMOD_LOOP_NORMAL, 0, &sound1);
+	ssystem->update();
 }
 
 GLvoid drawScene() {
@@ -128,7 +153,7 @@ GLvoid drawScene() {
 	glUseProgram(shaderProgramID);
 
 	unsigned int lightPosLocation = glGetUniformLocation(shaderProgramID, "lightPos");
-	glUniform3f(lightPosLocation, 10, 0, 0);
+	glUniform3f(lightPosLocation, -1 - move_character[0], 1, -1 - move_character[2]);
 	unsigned int lightColorLocation = glGetUniformLocation(shaderProgramID, "lightColor");
 	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
 	unsigned int objColorLocation = glGetUniformLocation(shaderProgramID, "objectColor");
@@ -136,7 +161,7 @@ GLvoid drawScene() {
 	unsigned int viewPosLocation = glGetUniformLocation(shaderProgramID, "viewPos"); //--- viewPos 값 전달: 카메라 위치
 	glUniform3f(viewPosLocation, cameraPos.x, cameraPos.y, cameraPos.z);
 	unsigned int ambient = glGetUniformLocation(shaderProgramID, "ambientLight"); //--- viewPos 값 전달: 카메라 위치
-	glUniform1f(ambient, 1);
+	glUniform1f(ambient, ambient_amount);
 
 	glm::mat4 TR = glm::mat4(1.0f);
 	glm::mat4 view = glm::mat4(1.0f);
@@ -165,6 +190,12 @@ GLvoid drawScene() {
 	projection = glm::translate(projection, glm::vec3(0.0, 0.0, -5.0));
 	projection = glm::rotate(projection, glm::radians(y_rad), glm::vec3(0.0, 1.0, 0.0));
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+
+	// 대략적인 조명 위치
+	TR = glm::translate(TR, glm::vec3(-2 -move_character[0], 1, 1 -move_character[2]));
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	glBindTexture(GL_TEXTURE_2D, road_texture);
 	for (int i = 0; i < roads.size(); ++i) {
@@ -293,6 +324,14 @@ GLvoid Timer_event(int value) {
 GLvoid Keyboard(unsigned char key, int x, int y) {
 	if (!interupt) {
 		switch (key) {
+		case '-':
+			if (ambient_amount > 0.1)
+				ambient_amount -= 0.1;
+			break;
+		case '+':
+			if (ambient_amount < 1)
+				ambient_amount += 0.1;
+			break;
 		case 'p':
 			game_start = true;
 			break;
