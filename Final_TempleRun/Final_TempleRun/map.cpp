@@ -2,9 +2,6 @@
 #include "map.h"
 
 std::vector<Road> roads;
-random_device rd;
-std::mt19937 dre(rd());
-std::uniform_int_distribution<int> uid{ 0, 1 };
 
 void Road::select_pos(float x, float z) {
 	pos[0] = x;
@@ -25,9 +22,25 @@ void Road::draw(GLuint vao, unsigned int modelLocation) {
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void Road::player_distance(float* player_pos) {
-	if (std::abs(player_pos[2] + pos[2]) >= 10 && -player_pos[2] < pos[2])
-		is_delete = true;
+void Road::player_distance(float* player_pos, int* camera_dir) {
+	if (pow((player_pos[2] + pos[2]), 2) + pow((player_pos[0] + pos[0]), 2) >= 100) {
+		if (dir == 0) {
+			if(player_pos[2] > -pos[2])
+				is_delete = true;
+		}
+		else if (dir == 1) {
+			if (-player_pos[0] > pos[0])
+				is_delete = true;
+		}
+		else if (dir == 2) {
+			if (player_pos[2] < -pos[2])
+				is_delete = true;
+		}
+		else if (dir == 3) {
+			if (-player_pos[0] < pos[0])
+				is_delete = true;
+		}
+	}
 }
 
 bool Road::return_is_delete() {
@@ -38,17 +51,8 @@ float* Road::return_pos() {
 	return pos;
 }
 
-void Road::select_dir() {
-	if (uid(dre) == 0) {
-		dir += 1;
-	}
-	else {
-		dir -= 1;
-	}
-
-	if (dir == -1)
-		dir = 3;
-	dir = dir % 4;
+void Road::select_dir(int map_dir) {
+	dir = map_dir;
 }
 
 int Road::return_dir() { return dir; }

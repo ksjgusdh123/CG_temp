@@ -57,7 +57,7 @@ void Body::draw(GLuint vao, unsigned int modelLocation) {
 	Body::transform();
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 1000);
+	glDrawArrays(GL_TRIANGLES, 0, 792);
 
 }
 
@@ -190,7 +190,7 @@ void Leg::draw(GLuint vao, unsigned int modelLocation, GLuint leg_texture) {
 		glBindTexture(GL_TEXTURE_2D, leg_texture);
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 850);
+	glDrawArrays(GL_TRIANGLES, 0, 438);
 }
 
 void Leg::get_move(float* move_amount, float* get_rad, bool slide) {
@@ -255,3 +255,104 @@ void Human::road_check(float* move_amount) {
 		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -6,6 +6,10 @@
 #include "stb_image.h"
 #include "map.h"
 
+random_device rd;
+std::mt19937 dre(rd());
+std::uniform_int_distribution<int> uid{ 0, 1 };
+
 unsigned int head_vao, head_vbo[3];
 unsigned int body_vao, body_vbo[3];
 unsigned int left_arm_vao, left_arm_vbo[3];
@@ -64,6 +68,8 @@ void turn_camera();
 
 // map객체
 Road road;
+int delete_num = 0;
+int map_dir = 0;
 
 // 키입력 객체
 float y_rad = 0;
@@ -186,16 +192,35 @@ GLvoid Timer_event(int value) {
 		}
 	}
 
+	if (delete_num >= 40) {
+		if (uid(dre) == 0)
+			map_dir += 1;
+		else
+			map_dir -= 1;
+		if (map_dir == -1)
+			map_dir = 3;
+		else if (map_dir == 4)
+			map_dir = 0;
+		delete_num = 0;
+	}
+		
 	// 도로 삭제 검사
 	if (roads.size() != 0) {
 		for (int i = 0; i < roads.size(); ++i) {
-			roads.at(i).player_distance(move_character);
+			roads.at(i).player_distance(move_character, camera_dir);
 		}
 		for (int i = 0; i < roads.size(); ++i) {
 			if (roads.at(i).return_is_delete()) {
-				//road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 1); // 앞으로 생성
-				road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 1, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
-				//road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 1, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
+				++delete_num;
+				road.select_dir(map_dir);
+				if(road.return_dir() == 0)
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 1); // 앞으로 생성
+				else if (road.return_dir() == 2)
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 1); // 앞으로 생성
+				else if (road.return_dir() == 1)
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 1, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
+				else if (road.return_dir() == 3)
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 1, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
 
 				roads.push_back(road);
 				roads.erase(roads.begin() + i);
@@ -231,6 +256,7 @@ GLvoid Timer_event(int value) {
 			rad[0] -= 10;
 		else if(!flip && !is_jump && !is_slide)
 			rad[0] += 10;
+		cout << "x: " << move_character[0] << '\n';
 		cout << "z: " << move_character[2] << '\n';
 	}
 
@@ -405,7 +431,7 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	stbi_set_flip_vertically_on_load (true); 
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load("temp_city.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 
@@ -416,7 +442,7 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("rightleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
+	data = stbi_load("leftleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, widthImage, heightImage, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 
 	glGenTextures(1, &road_texture); //--- 텍스처 생성
@@ -610,6 +636,11 @@ void Initvbovao()
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+	glBindBuffer(GL_ARRAY_BUFFER, head_vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
@@ -626,6 +657,11 @@ void Initvbovao()
 	glBindBuffer(GL_ARRAY_BUFFER, body_vbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, body_vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -644,6 +680,11 @@ void Initvbovao()
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+	glBindBuffer(GL_ARRAY_BUFFER, right_leg_vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
@@ -661,8 +702,14 @@ void Initvbovao()
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+	glBindBuffer(GL_ARRAY_BUFFER, left_leg_vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
 	Load_Object("rightarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 
@@ -677,6 +724,11 @@ void Initvbovao()
 	glBindBuffer(GL_ARRAY_BUFFER, right_arm_vbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, right_arm_vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -694,6 +746,11 @@ void Initvbovao()
 	glBindBuffer(GL_ARRAY_BUFFER, left_arm_vbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, left_arm_vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -721,5 +778,4 @@ void Initvbovao()
 
 }
 
-
-
+                                                                                                        
