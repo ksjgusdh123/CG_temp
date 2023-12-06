@@ -227,6 +227,10 @@ GLvoid drawScene() {
 
 	//장애물 그리기
 	for (int i = 0; i < ob.size(); ++i) {
+		if(dynamic_cast<Hurdle*>(ob[i]))
+			glBindVertexArray(hurdle_vao);
+		else
+			glBindVertexArray(truck_vao);
 		ob.at(i)->draw(truck_vao, modelLocation, texture);
 	}
 
@@ -764,8 +768,15 @@ void Initvbovao()
 
 	Load_Object("resource\\ob\\truck.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(truck_vao, truck_vbo);
+
+	Load_Object("resource\\ob\\fence.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	gen_vao(hurdle_vao, hurdle_vbo);
+
+
 }
 
+
+// vao 생성 자동화
 void gen_vao(GLuint& fvao, GLuint* fvbo) {
 	glGenVertexArrays(1, &fvao);
 	glGenBuffers(3, fvbo);
