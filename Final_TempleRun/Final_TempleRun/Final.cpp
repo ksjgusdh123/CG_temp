@@ -5,6 +5,7 @@
 #include "Human.h"
 #include "stb_image.h"
 #include "map.h"
+#include "obstacle.h"
 #include "inc/fmod.hpp"
 #include "inc/fmod_errors.h"
 #pragma comment(lib, "fmod_vc.lib")
@@ -18,8 +19,10 @@ void* extradriverdata = 0;
 random_device rd;
 std::mt19937 dre(rd());
 std::uniform_int_distribution<int> uid{ 0, 1 };
+std::uniform_int_distribution<int> rand_ob{ 5, 30 };
 
 unsigned int head_vao, head_vbo[3];
+unsigned int truck_vao, truck_vbo[3];
 unsigned int body_vao, body_vbo[3];
 unsigned int left_arm_vao, left_arm_vbo[3];
 unsigned int right_arm_vao, right_arm_vbo[3];
@@ -99,13 +102,15 @@ bool is_jump = false;
 bool jump_flip = false;
 bool game_start = false;
 bool is_slide = false;
-float ambient_amount = 0.5;
+float ambient_amount = 1;
 
 // 임시배경 큐브
 GLuint vao, vbo[3];
 
-int main(int argc, char** argv) {
+// 카메라 각도 임시 조작
+float camera[3]{ 0 };
 
+int main(int argc, char** argv) {
 	srand(time(NULL));
 	result = FMOD::System_Create(&ssystem);
 	glutInit(&argc, argv);
@@ -128,6 +133,7 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(Keyboard);
 	glutSpecialFunc(SpecialKeyboard);
 	glutSpecialUpFunc(specialKeyUpCallback);
+
 	channel->stop();
 	channel->setVolume(1.0);
 	ssystem->update();
@@ -188,15 +194,22 @@ GLvoid drawScene() {
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
 	projection = glm::perspective(glm::radians(30.0f), 1.0f, 0.1f, 50.0f);
-	projection = glm::translate(projection, glm::vec3(0.0, 0.0, -5.0));
-	projection = glm::rotate(projection, glm::radians(y_rad), glm::vec3(0.0, 1.0, 0.0));
+	projection = glm::translate(projection, glm::vec3(0.0 + camera[0], 0.0 + camera[1], -5.0 + camera[2]));
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 
 	// 대략적인 조명 위치
-	TR = glm::translate(TR, glm::vec3(-2 -move_character[0], 1, 1 -move_character[2]));
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//TR = glm::translate(TR, glm::vec3(-2 -move_character[0], 1, 1 -move_character[2]));
+	//glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
+	//glBindVertexArray(vao);
+	//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//TR = glm::mat4(1.0f);
+	//TR = glm::translate(TR, glm::vec3(0, 2, -14));
+	//TR = glm::scale(TR, glm::vec3(0.1, 0.1, 0.1));
+	//glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
+	//glBindVertexArray(truck_vao);
+	//glDrawArrays(GL_TRIANGLES, 0, 3312);
+
 
 	// 맵 그리기
 	glBindTexture(GL_TEXTURE_2D, road_texture[0]);
@@ -208,6 +221,10 @@ GLvoid drawScene() {
 		roads.at(i).draw(vao, modelLocation);
 	}
 
+	//장애물 그리기
+	for (int i = 0; i < ob.size(); ++i) {
+		ob.at(i)->draw(truck_vao, modelLocation, texture);
+	}
 
 	/*그리기*/
 	glBindTexture(GL_TEXTURE_2D, leg_texture);
@@ -229,6 +246,10 @@ GLvoid Timer_event(int value) {
 			roads.push_back(road);
 			roads.at(i).select_pos(0, -i);
 		}
+		for (int i = 0; i < 5; ++i) {
+			ob.push_back(new Truck);
+			ob.at(i)->set_pos(0, -1 * rand_ob(dre));
+		}
 	}
 
 	if (delete_num >= 40) {
@@ -242,7 +263,6 @@ GLvoid Timer_event(int value) {
 			map_dir = 0;
 		delete_num = 0;
 	}
-		
 	// 도로 삭제 검사
 	if (roads.size() != 0) {
 		for (int i = 0; i < roads.size(); ++i) {
@@ -265,6 +285,20 @@ GLvoid Timer_event(int value) {
 				roads.erase(roads.begin() + i);
 			}
 		}
+	}
+
+	// 장애물 삭제 검사
+	if (ob.size() != 0) {
+		for (int i = 0; i < ob.size(); ++i) {
+			ob.at(i)->player_distance(move_character);
+		}
+		for (int i = 0; i < ob.size(); ++i) {
+			if (ob.at(i)->return_delete()) {
+				delete ob[i];
+				ob.erase(ob.begin() + i);
+			}
+		}
+
 	}
 
 	// 게임 시작시 자동으로 이동
@@ -292,9 +326,9 @@ GLvoid Timer_event(int value) {
 		}    
 		 
 		if (flip && !is_jump && !is_slide)
-			rad[0] -= 10;
+			rad[0] -= 2;
 		else if(!flip && !is_jump && !is_slide)
-			rad[0] += 10;
+			rad[0] += 2;
 		cout << "x: " << move_character[0] << '\n';
 		cout << "z: " << move_character[2] << '\n';
 	}
@@ -326,7 +360,7 @@ GLvoid Timer_event(int value) {
 	cameraDirection.x = -move_character[0];
 	cameraDirection.z = -move_character[2];
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
-	glutTimerFunc(100, Timer_event, 4);
+	glutTimerFunc(10, Timer_event, 4);
 }
 
 GLvoid Keyboard(unsigned char key, int x, int y) {
@@ -399,6 +433,9 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		case 'Z':
 			y_rad -= 10;
 			break;
+		case 't':
+			camera[1] += 0.1;
+			break;
 		}
 	}
 
@@ -444,8 +481,10 @@ void SpecialKeyboard(int key, int x, int y) {
 		}
 	}
 	else if (key == GLUT_KEY_DOWN) {
-		is_slide = true;
-		rad[0] = -90;
+		if (!is_jump) {
+			is_slide = true;
+			rad[0] = -90;
+		}
 	}
 	else if (key == GLUT_KEY_UP) {
 		if (is_jump == false)
@@ -825,6 +864,27 @@ void Initvbovao()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	Load_Object("resource\\ob\\truck.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	glGenVertexArrays(1, &truck_vao);
+	glGenBuffers(3, truck_vbo);
+	glBindVertexArray(truck_vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, truck_vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, truck_vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, truck_vbo[2]);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 

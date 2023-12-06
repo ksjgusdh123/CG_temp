@@ -5,8 +5,8 @@ std::vector<Road> roads;
 
 void Road::select_pos(float x, float z) {
 	pos[0] = x;
-	pos[2] = z;
 	pos[1] = -1.7;
+	pos[2] = z;
 }
 
 void Road::transform() {

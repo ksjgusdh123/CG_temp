@@ -49,7 +49,7 @@ class Human {
 	Leg left_leg;
 	Leg right_leg;	
 	int dir;
-	float speed{ 0.3 };
+	float speed{ 0.1 };
 	float rad[3];
 	bool slide;
 public:
