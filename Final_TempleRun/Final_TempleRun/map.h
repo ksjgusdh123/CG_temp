@@ -9,10 +9,10 @@ public:
 	void select_pos(float, float);
 	void transform();
 	void draw(GLuint, unsigned int);
-	void player_distance(float*);
+	void player_distance(float*, int*);
 	bool return_is_delete();
 	float* return_pos();
-	void select_dir();
+	void select_dir(int map_dir);
 	int return_dir();
 };
 

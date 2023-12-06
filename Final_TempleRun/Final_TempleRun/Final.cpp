@@ -51,7 +51,7 @@ GLuint fragmentShader;
 GLchar* vertexSource, * fragmentSource;
 GLuint texture;
 GLuint leg_texture;
-GLuint road_texture;
+GLuint road_texture[2];
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 	channel->stop();
 	channel->setVolume(1.0);
 	ssystem->update();
-	ssystem->playSound(sound1, 0, false, &channel);
+	//ssystem->playSound(sound1, 0, false, &channel);
 	glutTimerFunc(100, Timer_event, 4);
 	glutMainLoop();
 
@@ -153,6 +153,7 @@ GLvoid drawScene() {
 	glUseProgram(shaderProgramID);
 
 	unsigned int lightPosLocation = glGetUniformLocation(shaderProgramID, "lightPos");
+	//glUniform3f(lightPosLocation, -move_character[0], 1, -1 - move_character[2]);
 	glUniform3f(lightPosLocation, -1 - move_character[0], 1, -1 - move_character[2]);
 	unsigned int lightColorLocation = glGetUniformLocation(shaderProgramID, "lightColor");
 	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
@@ -197,12 +198,19 @@ GLvoid drawScene() {
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	glBindTexture(GL_TEXTURE_2D, road_texture);
+	// 맵 그리기
+	glBindTexture(GL_TEXTURE_2D, road_texture[0]);
 	for (int i = 0; i < roads.size(); ++i) {
+		if(roads.at(i).return_dir() == 0 || roads.at(i).return_dir() == 2)
+			glBindTexture(GL_TEXTURE_2D, road_texture[0]);
+		else
+			glBindTexture(GL_TEXTURE_2D, road_texture[1]);
 		roads.at(i).draw(vao, modelLocation);
 	}
-	glBindTexture(GL_TEXTURE_2D, leg_texture);
+
+
 	/*그리기*/
+	glBindTexture(GL_TEXTURE_2D, leg_texture);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
@@ -484,14 +492,23 @@ void InitTexture()
 	data = stbi_load("leftleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, widthImage, heightImage, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 
-	glGenTextures(1, &road_texture); //--- 텍스처 생성
-	glBindTexture(GL_TEXTURE_2D, road_texture); //--- 텍스처 바인딩
+	glGenTextures(2, road_texture); //--- 텍스처 생성
+	glBindTexture(GL_TEXTURE_2D, road_texture[0]); //--- 텍스처 바인딩
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	stbi_set_flip_vertically_on_load(true);
 	data = stbi_load("temp_road3.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
+
+	glBindTexture(GL_TEXTURE_2D, road_texture[1]); //--- 텍스처 바인딩
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	stbi_set_flip_vertically_on_load(true);
+	data = stbi_load("temp_road3_horizon.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 }
 
