@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
 
 void sound_init() {
 	ssystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	ssystem->createSound("main_bgm.mp3", FMOD_LOOP_NORMAL, 0, &sound1);
+	ssystem->createSound("sound\\main_bgm.mp3", FMOD_LOOP_NORMAL, 0, &sound1);
 	ssystem->update();
 }
 
@@ -479,7 +479,7 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load("temp_city.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
+	unsigned char* data = stbi_load("image\\temp_city.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 
 	glGenTextures(1, &leg_texture); //--- 텍스처 생성
@@ -489,7 +489,7 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("leftleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
+	data = stbi_load("resource\\character\\leftleg.png", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, widthImage, heightImage, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 
 	glGenTextures(2, road_texture); //--- 텍스처 생성
@@ -499,7 +499,7 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("temp_road3.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
+	data = stbi_load("image\\temp_road3.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 
 	glBindTexture(GL_TEXTURE_2D, road_texture[1]); //--- 텍스처 바인딩
@@ -508,7 +508,7 @@ void InitTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("temp_road3_horizon.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
+	data = stbi_load("image\\temp_road3_horizon.jpg", &widthImage, &heightImage, &numberOfChannel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
 }
 
@@ -678,7 +678,7 @@ void Initvbovao()
 	int ColorLocation = glGetAttribLocation(shaderProgramID, "in_Color");
 
 	//머리
-	Load_Object("head.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\head.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 
 	glGenVertexArrays(1, &head_vao);
 	glGenBuffers(3, head_vbo);
@@ -700,7 +700,7 @@ void Initvbovao()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	Load_Object("body.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\body.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 
 	glGenVertexArrays(1, &body_vao);
 	glGenBuffers(3, body_vbo);
@@ -722,7 +722,7 @@ void Initvbovao()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	Load_Object("rightleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\rightleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 
 	glGenVertexArrays(1, &right_leg_vao);
 	glGenBuffers(3, right_leg_vbo);
@@ -744,7 +744,7 @@ void Initvbovao()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	Load_Object("leftleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\leftleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 
 	glGenVertexArrays(1, &left_leg_vao);
 	glGenBuffers(3, left_leg_vbo);
@@ -767,7 +767,7 @@ void Initvbovao()
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	Load_Object("rightarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\rightarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 
 	glGenVertexArrays(1, &right_arm_vao);
 	glGenBuffers(3, right_arm_vbo);
@@ -789,7 +789,7 @@ void Initvbovao()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	Load_Object("leftarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\leftarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 
 	glGenVertexArrays(1, &left_arm_vao);
 	glGenBuffers(3, left_arm_vbo);
@@ -811,7 +811,7 @@ void Initvbovao()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	Load_Object("cube.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\cube.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(3, vbo);
 	glBindVertexArray(vao);
