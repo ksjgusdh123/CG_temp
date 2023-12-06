@@ -168,8 +168,8 @@ GLvoid drawScene() {
 	glUseProgram(shaderProgramID);
 
 	unsigned int lightPosLocation = glGetUniformLocation(shaderProgramID, "lightPos");
-	//glUniform3f(lightPosLocation, -move_character[0], 1, -1 - move_character[2]);
-	glUniform3f(lightPosLocation, -1 - move_character[0], 1, -1 - move_character[2]);
+	glUniform3f(lightPosLocation, -move_character[0], 1, -1 - move_character[2]);
+	//glUniform3f(lightPosLocation, -1 - move_character[0], 1, -1 - move_character[2]);
 	unsigned int lightColorLocation = glGetUniformLocation(shaderProgramID, "lightColor");
 	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
 	unsigned int objColorLocation = glGetUniformLocation(shaderProgramID, "objectColor");
@@ -331,7 +331,11 @@ GLvoid Timer_event(int value) {
 			}
 		}
 	}
-	std::cout << ob.size() << std::endl;
+
+	// 충돌체크
+	for (int i = 0; i < ob.size(); ++i) {
+		ob.at(i)->collision(move_character, player);
+	}
 
 	// 게임 시작시 자동으로 이동
 	if (game_start) {
@@ -361,8 +365,6 @@ GLvoid Timer_event(int value) {
 			rad[0] -= 2;
 		else if(!flip && !is_jump && !is_slide)
 			rad[0] += 2;
-		cout << "x: " << move_character[0] << '\n';
-		cout << "z: " << move_character[2] << '\n';
 	}
 
 	// 점프
@@ -435,7 +437,6 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 				rad[0] -= 5;
 			else
 				rad[0] += 5;
-			cout << "z: " << move_character_z << '\n';
 			break;
 		case 's':
 			move_character[2] -= 0.1;

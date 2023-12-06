@@ -221,13 +221,14 @@ void Human::draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint 
 	left_leg.draw(left_leg_vao, modelLocation, 0);
 }
 
-void Human::move(float* move_amount, float* rad, bool slide) {
-	head.get_move(move_amount, rad, slide);
-	body.get_move(move_amount, rad, slide);
-	right_arm.get_move(move_amount, rad, slide);
-	left_arm.get_move(move_amount, rad, slide);
-	right_leg.get_move(move_amount, rad, slide);
-	left_leg.get_move(move_amount, rad, slide);
+void Human::move(float* move_amount, float* rad, bool pslide) {
+	head.get_move(move_amount, rad, pslide);
+	body.get_move(move_amount, rad, pslide);
+	right_arm.get_move(move_amount, rad, pslide);
+	left_arm.get_move(move_amount, rad, pslide);
+	right_leg.get_move(move_amount, rad, pslide);
+	left_leg.get_move(move_amount, rad, pslide);
+	slide = pslide;
 }
 
 void Human::turn(int i) {
@@ -249,12 +250,13 @@ void Human::road_check(float* move_amount) {
 		if (-(roads.at(i).return_pos())[0] - 1.5 < move_amount[0] && -(roads.at(i).return_pos())[0] + 1.5 > move_amount[0]
 			&& -(roads.at(i).return_pos())[2] - 1.5 < move_amount[2] && -(roads.at(i).return_pos())[2] + 1.5 > move_amount[2]
 			&& (-0.1 <= move_amount[1])){
-			std::cout << "Çã°Å" << endl;
 			if(move_amount[1] < 0)
 				move_amount[1] = 0;
 		}
 	}
 }
+
+bool Human::return_slide() { return slide; }
 
 
 

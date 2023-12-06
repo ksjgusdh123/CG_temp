@@ -1,5 +1,6 @@
 #pragma once
 #include "Header.h"
+#include "Human.h"
 
 class Obstacle {
 protected:
@@ -15,6 +16,7 @@ public:
 	virtual bool return_delete() = 0;
 	virtual void player_distance(float*) = 0;
 	virtual void select_dir(int) = 0;
+	virtual void collision(float*, Human&) = 0;
 };
 
 
@@ -26,6 +28,7 @@ public:
 	virtual bool return_delete() override;
 	virtual void player_distance(float*) override;
 	virtual void select_dir(int) override;
+	virtual void collision(float*, Human&) override;
 };
 
 class Hurdle : public Obstacle{
@@ -35,6 +38,7 @@ class Hurdle : public Obstacle{
 	virtual bool return_delete() override;
 	virtual void player_distance(float*) override;
 	virtual void select_dir(int) override;
+	virtual void collision(float*, Human&) override;
 };
 
 extern std::vector<Obstacle*> ob;

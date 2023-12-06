@@ -60,4 +60,5 @@ public:
 	int return_dir();
 	float get_speed();
 	void road_check(float* move_amount);
+	bool return_slide();
 };
