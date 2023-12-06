@@ -289,8 +289,8 @@ GLvoid Timer_event(int value) {
 		case -2:
 			move_character[2] -= player.get_speed();
 			break;
-		}
-
+		}    
+		 
 		if (flip && !is_jump && !is_slide)
 			rad[0] -= 10;
 		else if(!flip && !is_jump && !is_slide)
