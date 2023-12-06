@@ -10,12 +10,14 @@
 #include "inc/fmod_errors.h"
 #pragma comment(lib, "fmod_vc.lib")
 
+// FMOD
 FMOD::System* ssystem;
 FMOD::Sound* sound1, * sound2;
 FMOD::Channel* channel = 0;
 FMOD_RESULT result;
 void* extradriverdata = 0;
 
+// random 엔진
 random_device rd;
 std::mt19937 dre(rd());
 std::uniform_int_distribution<int> uid{ 0, 1 };
@@ -23,6 +25,7 @@ std::uniform_int_distribution<int> rand_ob{ 10, 70 };
 
 unsigned int head_vao, head_vbo[3];
 unsigned int truck_vao, truck_vbo[3];
+unsigned int hurdle_vao, hurdle_vbo[3];
 unsigned int body_vao, body_vbo[3];
 unsigned int left_arm_vao, left_arm_vbo[3];
 unsigned int right_arm_vao, right_arm_vbo[3];
@@ -73,6 +76,7 @@ void make_shaderProgram();
 void Initvbovao();
 void InitTexture();
 void Draw();
+void gen_vao(GLuint& vao, GLuint* vbo);
 
 // player객체
 Human player;
@@ -247,7 +251,10 @@ GLvoid Timer_event(int value) {
 			roads.at(i).select_pos(0, -i);
 		}
 		for (int i = 0; i < 5; ++i) {
-			ob.push_back(new Truck);
+			if (uid(dre) == 0)
+				ob.push_back(new Truck);
+			else
+				ob.push_back(new Hurdle);
 			ob.at(i)->set_pos(0, -1 * rand_ob(dre));
 		}
 	}
@@ -263,7 +270,11 @@ GLvoid Timer_event(int value) {
 			map_dir = 0;
 		int temp_ob_num = ob.size();
 		for (int i = temp_ob_num; i < 5 + temp_ob_num; ++i) {
-			ob.push_back(new Truck);
+			if (uid(dre) == 0)
+				ob.push_back(new Truck);
+			else
+				ob.push_back(new Hurdle);
+
 			ob.at(i)->select_dir(map_dir);
 			if(map_dir == 0)
 				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - rand_ob(dre));
@@ -731,173 +742,44 @@ void Initvbovao()
 
 	//머리
 	Load_Object("resource\\character\\head.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-
-	glGenVertexArrays(1, &head_vao);
-	glGenBuffers(3, head_vbo);
-	glBindVertexArray(head_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, head_vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, head_vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, head_vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	gen_vao(head_vao, head_vbo);
 
 	Load_Object("resource\\character\\body.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-
-	glGenVertexArrays(1, &body_vao);
-	glGenBuffers(3, body_vbo);
-	glBindVertexArray(body_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, body_vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, body_vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, body_vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	gen_vao(body_vao, body_vbo);
 
 	Load_Object("resource\\character\\rightleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-
-	glGenVertexArrays(1, &right_leg_vao);
-	glGenBuffers(3, right_leg_vbo);
-	glBindVertexArray(right_leg_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, right_leg_vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, right_leg_vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, right_leg_vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	gen_vao(right_leg_vao, right_leg_vbo);
 
 	Load_Object("resource\\character\\leftleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-
-	glGenVertexArrays(1, &left_leg_vao);
-	glGenBuffers(3, left_leg_vbo);
-	glBindVertexArray(left_leg_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, left_leg_vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, left_leg_vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, left_leg_vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
+	gen_vao(left_leg_vao, left_leg_vbo);
 
 	Load_Object("resource\\character\\rightarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-
-	glGenVertexArrays(1, &right_arm_vao);
-	glGenBuffers(3, right_arm_vbo);
-	glBindVertexArray(right_arm_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, right_arm_vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, right_arm_vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, right_arm_vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	gen_vao(right_arm_vao, right_arm_vbo);
 
 	Load_Object("resource\\character\\leftarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-
-	glGenVertexArrays(1, &left_arm_vao);
-	glGenBuffers(3, left_arm_vbo);
-	glBindVertexArray(left_arm_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, left_arm_vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, left_arm_vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, left_arm_vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	gen_vao(left_arm_vao, left_arm_vbo);
 
 	Load_Object("resource\\cube.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(3, vbo);
-	glBindVertexArray(vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
+	gen_vao(vao, vbo);
 
 	Load_Object("resource\\ob\\truck.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
-	glGenVertexArrays(1, &truck_vao);
-	glGenBuffers(3, truck_vbo);
-	glBindVertexArray(truck_vao);
+	gen_vao(truck_vao, truck_vbo);
+}
 
-	glBindBuffer(GL_ARRAY_BUFFER, truck_vbo[0]);
+void gen_vao(GLuint& fvao, GLuint* fvbo) {
+	glGenVertexArrays(1, &fvao);
+	glGenBuffers(3, fvbo);
+	glBindVertexArray(fvao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, fvbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, truck_vbo[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, fvbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, truck_vbo[2]);
+	glBindBuffer(GL_ARRAY_BUFFER, fvbo[2]);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
