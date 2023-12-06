@@ -19,7 +19,7 @@ void* extradriverdata = 0;
 random_device rd;
 std::mt19937 dre(rd());
 std::uniform_int_distribution<int> uid{ 0, 1 };
-std::uniform_int_distribution<int> rand_ob{ 5, 30 };
+std::uniform_int_distribution<int> rand_ob{ 10, 70 };
 
 unsigned int head_vao, head_vbo[3];
 unsigned int truck_vao, truck_vbo[3];
@@ -252,7 +252,7 @@ GLvoid Timer_event(int value) {
 		}
 	}
 
-	if (delete_num >= 40) {
+	if (delete_num >= 80) {
 		if (uid(dre) == 0)
 			map_dir += 1;
 		else
@@ -261,6 +261,19 @@ GLvoid Timer_event(int value) {
 			map_dir = 3;
 		else if (map_dir == 4)
 			map_dir = 0;
+		int temp_ob_num = ob.size();
+		for (int i = temp_ob_num; i < 5 + temp_ob_num; ++i) {
+			ob.push_back(new Truck);
+			ob.at(i)->select_dir(map_dir);
+			if(map_dir == 0)
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - rand_ob(dre));
+			else if(map_dir == 1)
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2]);
+			else if(map_dir == 2)
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + rand_ob(dre));
+			else if(map_dir == 3)
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2]);
+		}
 		delete_num = 0;
 	}
 	// 도로 삭제 검사
@@ -298,8 +311,8 @@ GLvoid Timer_event(int value) {
 				ob.erase(ob.begin() + i);
 			}
 		}
-
 	}
+	std::cout << ob.size() << std::endl;
 
 	// 게임 시작시 자동으로 이동
 	if (game_start) {
