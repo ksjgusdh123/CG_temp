@@ -29,25 +29,41 @@ void Truck::select_dir(int map_dir) {
 	dir = map_dir;
 }
 
-void Truck::set_pos(float x, float z) {
+void Truck::set_pos(float x, float z, int num) {
 	pos[0] = x;
 	pos[1] = 0.13;
 	pos[2] = z;
+	flip = num;
 }
 
 void Truck::transform() {
 	TR = glm::mat4(1.0f);
 	TR = glm::translate(TR, glm::vec3(pos[0], pos[1], pos[2])); //--- xÃàÀ¸·Î ÀÌµ¿ Çà·Ä
+	if (dir == 0) {
+		if(flip)
+			TR = glm::rotate(TR, glm::radians(0.f), glm::vec3(0, 1, 0));
+		else
+			TR = glm::rotate(TR, glm::radians(180.f), glm::vec3(0, 1, 0));
+	}
+	else if (dir == 1) {
+		if(flip)
+			TR = glm::rotate(TR, glm::radians(270.f), glm::vec3(0, 1, 0));
+		else
+			TR = glm::rotate(TR, glm::radians(90.f), glm::vec3(0, 1, 0));
+	}
+	else if (dir == 2) {
+		if(flip)
+			TR = glm::rotate(TR, glm::radians(180.f), glm::vec3(0, 1, 0));
+		else
+			TR = glm::rotate(TR, glm::radians(0.f), glm::vec3(0, 1, 0));
+	}
+	else if (dir == 3) {
+		if(flip)
+			TR = glm::rotate(TR, glm::radians(90.f), glm::vec3(0, 1, 0));
+		else
+			TR = glm::rotate(TR, glm::radians(270.f), glm::vec3(0, 1, 0));
+	}
 
-	if(dir == 0)
-		TR = glm::rotate(TR, glm::radians(0.f) , glm::vec3(0, 1, 0));
-	else if (dir == 1)
-		TR = glm::rotate(TR, glm::radians(270.f), glm::vec3(0, 1, 0));
-	else if (dir == 2)
-		TR = glm::rotate(TR, glm::radians(180.f), glm::vec3(0, 1, 0));
-	else if (dir == 3)
-		TR = glm::rotate(TR, glm::radians(90.f), glm::vec3(0, 1, 0));
-	
 	TR = glm::scale(TR, glm::vec3(0.12, 0.12, 0.1));
 }
 
@@ -67,27 +83,59 @@ void Truck::collision(float* player_pos, Human& player) {
 
 	// Æ®·° ¹× ¹ÙÄû pos[0] - 1.2ºÎÅÍ Æ®·° Áß½É 0.5 Á¤µµ
 	if (dir == 0 && player.return_dir() == 0) {
-		if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && ((temp_player_pos_x >= pos[0] - 1.2 && temp_player_pos_x <= pos[0] && !player.return_slide())
-			|| (temp_player_pos_x < pos[0] - 1.2 || temp_player_pos_x > pos[0]))) {
-			std::cout << "Á¢ÃË" << std::endl;
+		if (flip) {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && ((temp_player_pos_x >= pos[0] - 1.2 && temp_player_pos_x <= pos[0] && !player.return_slide())
+				|| (temp_player_pos_x < pos[0] - 1.2 || temp_player_pos_x > pos[0]))) {
+				std::cout << "Á¢ÃË" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && ((temp_player_pos_x <= pos[0] + 1.2 && temp_player_pos_x >= pos[0] && !player.return_slide())
+				|| (temp_player_pos_x > pos[0] + 1.2 || temp_player_pos_x < pos[0]))) {
+				std::cout << "Á¢ÃË" << std::endl;
+			}
 		}
 	}
 	else if (dir == 1 && (player.return_dir() == 1 || player.return_dir() == -3)) {
-		if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && ((temp_player_pos_z >= pos[2] - 1.2 && temp_player_pos_z <= pos[2] && !player.return_slide())
-			|| (temp_player_pos_z < pos[2] - 1.2 || temp_player_pos_z > pos[2]))) { 
-			std::cout << "Á¢ÃË2" << std::endl;
+		if (flip) {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && ((temp_player_pos_z >= pos[2] - 1.2 && temp_player_pos_z <= pos[2] && !player.return_slide())
+				|| (temp_player_pos_z < pos[2] - 1.2 || temp_player_pos_z > pos[2]))) {
+				std::cout << "Á¢ÃË2" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && ((temp_player_pos_z <= pos[2] + 1.2 && temp_player_pos_z >= pos[2] && !player.return_slide())
+				|| (temp_player_pos_z > pos[2] + 1.2 || temp_player_pos_z < pos[2]))) {
+				std::cout << "Á¢ÃË2" << std::endl;
+			}
 		}
 	}
 	else if (dir == 2 && (player.return_dir() == 2 || player.return_dir() == -2)) {
-		if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && ((temp_player_pos_x <= pos[0] + 1.2 && temp_player_pos_x >= pos[0] && !player.return_slide())
-			|| (temp_player_pos_x > pos[0] + 1.2 || temp_player_pos_x < pos[0]))) {
-			std::cout << "Á¢ÃË3" << std::endl;
+		if (flip) {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && ((temp_player_pos_x <= pos[0] + 1.2 && temp_player_pos_x >= pos[0] && !player.return_slide())
+				|| (temp_player_pos_x > pos[0] + 1.2 || temp_player_pos_x < pos[0]))) {
+				std::cout << "Á¢ÃË3" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && ((temp_player_pos_x >= pos[0] - 1.2 && temp_player_pos_x <= pos[0] && !player.return_slide())
+				|| (temp_player_pos_x < pos[0] - 1.2 || temp_player_pos_x > pos[0]))) {
+				std::cout << "Á¢ÃË3" << std::endl;
+			}
 		}
 	}
 	else if (dir == 3 && (player.return_dir() == -1 || player.return_dir() == 3)) {
-		if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && ((temp_player_pos_z <= pos[2] + 1.2 && temp_player_pos_z >= pos[2] && !player.return_slide())
-			|| (temp_player_pos_z > pos[2] + 1.2 || temp_player_pos_z < pos[2]))) {
-			std::cout << "Á¢ÃË4" << std::endl;
+		if (flip) {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && ((temp_player_pos_z <= pos[2] + 1.2 && temp_player_pos_z >= pos[2] && !player.return_slide())
+				|| (temp_player_pos_z > pos[2] + 1.2 || temp_player_pos_z < pos[2]))) {
+				std::cout << "Á¢ÃË4" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && ((temp_player_pos_z >= pos[2] - 1.2 && temp_player_pos_z <= pos[2] && !player.return_slide())
+				|| (temp_player_pos_z < pos[2] - 1.2 || temp_player_pos_z > pos[2]))) {
+				std::cout << "Á¢ÃË4" << std::endl;
+			}
 		}
 	}
 }
@@ -119,7 +167,7 @@ void Hurdle::select_dir(int map_dir) {
 	dir = map_dir;
 }
 
-void Hurdle::set_pos(float x, float z) {
+void Hurdle::set_pos(float x, float z, int num) {
 	pos[0] = x;
 	pos[1] = -0.70;
 	pos[2] = z;

@@ -263,7 +263,7 @@ GLvoid Timer_event(int value) {
 				ob.push_back(new Truck);
 			else
 				ob.push_back(new Hurdle);
-			ob.at(i)->set_pos(0, -1 * rand_ob(dre));
+			ob.at(i)->set_pos(0, -1 * rand_ob(dre), uid(dre));
 		}
 	}
 
@@ -285,13 +285,13 @@ GLvoid Timer_event(int value) {
 
 			ob.at(i)->select_dir(map_dir);
 			if(map_dir == 0)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - rand_ob(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - rand_ob(dre), uid(dre));
 			else if(map_dir == 1)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2]);
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 			else if(map_dir == 2)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + rand_ob(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + rand_ob(dre), uid(dre));
 			else if(map_dir == 3)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2]);
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 		}
 		delete_num = 0;
 	}
