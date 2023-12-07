@@ -12,11 +12,11 @@ void Apart::draw(GLuint vao, unsigned int modelLocation) {
 void Apart::transform() {
 	TR = glm::mat4(1.0f);
 	if (is_right) {
-		TR = glm::translate(TR, glm::vec3(pos[0] + 2, pos[1], pos[2]));
+		TR = glm::translate(TR, glm::vec3(pos[0] + 2.2, pos[1], pos[2]));
 		TR = glm::rotate(TR, glm::radians(-90.f), glm::vec3(0, 1.0, 0));
 	}
 	else {
-		TR = glm::translate(TR, glm::vec3(pos[0] - 2, pos[1], pos[2]));
+		TR = glm::translate(TR, glm::vec3(pos[0] - 2.2, pos[1], pos[2]));
 		TR = glm::rotate(TR, glm::radians(90.f), glm::vec3(0, 1.0, 0));
 	}
 	TR = glm::scale(TR, glm::vec3(0.07, 0.05, 0.05));
@@ -32,8 +32,28 @@ void Apart::select_pos(float x, float z, int num) {
 		is_right = false;
 }
 
+void Apart::player_distance(float* player_pos) {
+	if (pow((player_pos[2] + pos[2]), 2) + pow((player_pos[0] + pos[0]), 2) >= 100) {
+		if (dir == 0) {
+			if (player_pos[2] > -pos[2])
+				is_delete = true;
+		}
+		else if (dir == 1) {
+			if (-player_pos[0] > pos[0])
+				is_delete = true;
+		}
+		else if (dir == 2) {
+			if (player_pos[2] < -pos[2])
+				is_delete = true;
+		}
+		else if (dir == 3) {
+			if (-player_pos[0] < pos[0])
+				is_delete = true;
+		}
+	}
+}
 
-bool Apart::return_is_delete() {
+bool Apart::return_delete() {
 	return is_delete;
 }
 

@@ -363,6 +363,17 @@ GLvoid Timer_event(int value) {
 		}
 	}
 
+	// 건물 삭제 검사
+	for (int i = 0; i < building.size(); ++i) {
+		building.at(i)->player_distance(move_character);
+	}
+	for (int i = 0; i < building.size(); ++i) {
+		if (building.at(i)->return_delete()) {
+			delete building[i];
+			building.erase(building.begin() + i);
+		}
+	}
+
 	// 충돌체크
 	for (int i = 0; i < ob.size(); ++i) {
 		ob.at(i)->collision(move_character, player);
