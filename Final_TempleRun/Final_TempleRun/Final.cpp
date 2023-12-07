@@ -6,6 +6,7 @@
 #include "stb_image.h"
 #include "map.h"
 #include "obstacle.h"
+#include "wall.h"
 #include "inc/fmod.hpp"
 #include "inc/fmod_errors.h"
 #pragma comment(lib, "fmod_vc.lib")
@@ -31,6 +32,7 @@ unsigned int left_arm_vao, left_arm_vbo[3];
 unsigned int right_arm_vao, right_arm_vbo[3];
 unsigned int left_leg_vao, left_leg_vbo[3];
 unsigned int right_leg_vao, right_leg_vbo[3];
+unsigned int apart_vao, apart_vbo[3];
 
 std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
 
@@ -59,6 +61,7 @@ GLuint texture;
 GLuint leg_texture;
 GLuint road_texture;
 GLuint road_texture_horizon;
+GLuint apart_horizon;
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -172,8 +175,24 @@ GLvoid drawScene() {
 	glUseProgram(shaderProgramID);
 
 	unsigned int lightPosLocation = glGetUniformLocation(shaderProgramID, "lightPos");
-	glUniform3f(lightPosLocation, -move_character[0], 1, -1 - move_character[2]);
-	//glUniform3f(lightPosLocation, -1 - move_character[0], 1, -1 - move_character[2]);
+	
+	switch (player.return_dir()) {
+	case 0:
+		glUniform3f(lightPosLocation, -move_character[0], 0, -2 - move_character[2]);
+		break;
+	case 1:
+	case -3:
+		glUniform3f(lightPosLocation, 2 -move_character[0], 0, - move_character[2]);
+		break;
+	case 2:
+	case -2:
+		glUniform3f(lightPosLocation, -move_character[0], 0, 2 - move_character[2]);
+		break;
+	case 3:
+	case -1:
+		glUniform3f(lightPosLocation, -2 - move_character[0], 0, -move_character[2]);
+		break;
+	}
 	unsigned int lightColorLocation = glGetUniformLocation(shaderProgramID, "lightColor");
 	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
 	unsigned int objColorLocation = glGetUniformLocation(shaderProgramID, "objectColor");
@@ -242,6 +261,10 @@ GLvoid drawScene() {
 		ob.at(i)->draw(truck_vao, modelLocation, texture);
 	}
 
+	for (int i = 0; i < building.size(); ++i) {
+		building.at(i)->draw(apart_vao, modelLocation);
+	}
+
 	/*그리기*/
 	glBindTexture(GL_TEXTURE_2D, leg_texture);
 	glEnable(GL_BLEND);
@@ -268,6 +291,10 @@ GLvoid Timer_event(int value) {
 			else
 				ob.push_back(new Hurdle);
 			ob.at(i)->set_pos(0, -10 + i * -20, uid(dre));
+		}
+		for (int i = 0; i < 100; ++i) {
+			building.push_back(new Apart);
+			building.at(i)->select_pos(0, -i, i);
 		}
 	}
 
@@ -785,7 +812,8 @@ void Initvbovao()
 	Load_Object("resource\\ob\\fence.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(hurdle_vao, hurdle_vbo);
 
-
+	Load_Object("resource\\ob\\apart.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	gen_vao(apart_vao, apart_vbo);
 }
 
 // texture 파일 자동 읽기

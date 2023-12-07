@@ -137,6 +137,7 @@
     <ClCompile Include="Human.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="obstacle.cpp" />
+    <ClCompile Include="wall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl" />
@@ -149,6 +150,7 @@
     <ClInclude Include="map.h" />
     <ClInclude Include="obstacle.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="wall.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

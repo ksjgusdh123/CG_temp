@@ -12,7 +12,7 @@ void Road::select_pos(float x, float z) {
 void Road::transform() {
 	TR = glm::mat4(1.0f);
 	TR = glm::translate(TR, glm::vec3(pos[0], pos[1], pos[2]));
-	TR = glm::scale(TR, glm::vec3(1.5, 1.0, 1.5));
+	TR = glm::scale(TR, glm::vec3(2, 1.0, 2));
 }
 
 void Road::draw(GLuint vao, unsigned int modelLocation) {
