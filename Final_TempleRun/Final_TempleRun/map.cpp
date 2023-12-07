@@ -56,3 +56,7 @@ void Road::select_dir(int map_dir) {
 }
 
 int Road::return_dir() { return dir; }
+
+void Road::set_cross(int num) { cross = num; }
+
+int Road::return_cross() { return cross; }

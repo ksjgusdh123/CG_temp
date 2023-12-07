@@ -48,11 +48,13 @@ class Human {
 	Arm right_arm;
 	Leg left_leg;
 	Leg right_leg;	
+	Road last;
 	int dir;
 	float speed{ 0.1 };
 	float rad[3];
 	bool slide;
 	bool jump;
+	bool cross = false;
 	float light = 100;
 public:
 	Human();
@@ -68,4 +70,6 @@ public:
 	void set_speed(float a);	
 	void set_light(float num);
 	float return_light();
+	void set_road(Road&);
+	void position_setting(float*);
 };

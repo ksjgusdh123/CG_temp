@@ -95,7 +95,7 @@ void turn_camera();
 Road road;
 int delete_num = 0;
 int map_dir = 0;
-float MAP_SIZE = 150;
+float MAP_SIZE = 40;
 
 // 사운드
 void sound_init();
@@ -288,7 +288,7 @@ GLvoid Timer_event(int value) {
 	if (roads.size() == 0) {
 		for (int i = 0; i < 40; ++i) {
 			roads.push_back(road);
-			roads.at(i).select_pos(0, -i);
+			roads.at(i).select_pos(0, -i * 4);
 		}
 		for (int i = 0; i < 5; ++i) {
 			if (uid(dre) == 0)
@@ -313,6 +313,7 @@ GLvoid Timer_event(int value) {
 			map_dir = 3;
 		else if (map_dir == 4)
 			map_dir = 0;
+		roads.at(roads.size() - 1).set_cross(map_dir);
 		int temp_ob_num = ob.size();
 		for (int i = temp_ob_num; i < 5 + temp_ob_num; ++i) {
 			if (uid(dre) == 0)
@@ -332,6 +333,7 @@ GLvoid Timer_event(int value) {
 		}
 		delete_num = 0;
 	}
+
 	// 도로 삭제 검사
 	if (roads.size() != 0) {
 		for (int i = 0; i < roads.size(); ++i) {
@@ -342,16 +344,18 @@ GLvoid Timer_event(int value) {
 				++delete_num;
 				road.select_dir(map_dir);
 				if(road.return_dir() == 0)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 1); // 앞으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 4); // 앞으로 생성
 				else if (road.return_dir() == 2)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 1); // 앞으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 4); // 앞으로 생성
 				else if (road.return_dir() == 1)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 1, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 4, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
 				else if (road.return_dir() == 3)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 1, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 4, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
 
 				roads.push_back(road);
 				roads.erase(roads.begin() + i);
+				--i;
+				if (delete_num >= 40) break;
 			}
 		}
 	}
@@ -435,6 +439,7 @@ GLvoid Timer_event(int value) {
 		}
 	}
 
+
 	if (space) {
 		if (player.return_light() > 0) {
 			if (ambient_amount < 0.5)
@@ -454,7 +459,7 @@ GLvoid Timer_event(int value) {
 	}
 	move_character[1] -= 0.05;
 	player.road_check(move_character);
-
+	player.position_setting(move_character);
 	cameraPos.x = -move_character[0] + camera_dir[0];
 	cameraPos.y = 1.5;
 	cameraPos.z = -move_character[2] + camera_dir[2];
@@ -498,6 +503,33 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			case 2:
 			case -2:
 				move_character[2] -= 0.8;
+				break;
+			}
+			if (flip)
+				rad[0] -= 5;
+			else
+				rad[0] += 5;
+			break;
+		case 'W':
+			if (rad[0] >= 90)
+				flip = true;
+			else if (rad[0] <= -90)
+				flip = false;
+			switch (player.return_dir()) {
+			case 0:
+				move_character[2] += 8;
+				break;
+			case -1:
+			case 3:
+				move_character[0] += 8;
+				break;
+			case 1:
+			case -3:
+				move_character[0] -= 8;
+				break;
+			case 2:
+			case -2:
+				move_character[2] -= 8;
 				break;
 			}
 			if (flip)
@@ -609,6 +641,7 @@ void SpecialKeyboard(int key, int x, int y) {
 			player.set_jump(true);
 		}
 	}
+	player.position_setting(move_character);
 }
 
 void specialKeyUpCallback(int key, int x, int y) {
