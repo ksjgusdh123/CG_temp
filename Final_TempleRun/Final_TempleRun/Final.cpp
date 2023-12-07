@@ -297,10 +297,11 @@ GLvoid Timer_event(int value) {
 				ob.push_back(new Hurdle);
 			ob.at(i)->set_pos(0, -10 + i * -20, uid(dre));
 		}
-		for (int i = 0; i < 189; ++i) {
+		/*for (int i = 0; i < 189; ++i) {
 			building.push_back(new Apart);
-			building.at(i)->select_pos(0, -i, i);
-		}
+			if(i != 188)
+				building.at(i)->select_pos(0, -i, i);
+		}*/
 	}
 
 	if (delete_num >= MAP_SIZE) {
@@ -369,7 +370,7 @@ GLvoid Timer_event(int value) {
 	}
 
 	// 건물 삭제 검사
-	for (int i = 0; i < building.size(); ++i) {
+	/*for (int i = 0; i < building.size(); ++i) {
 		building.at(i)->player_distance(move_character);
 	}
 	for (int i = 0; i < building.size(); ++i) {
@@ -377,7 +378,7 @@ GLvoid Timer_event(int value) {
 			delete building[i];
 			building.erase(building.begin() + i);
 		}
-	}
+	}*/
 
 	// 충돌체크
 	for (int i = 0; i < ob.size(); ++i) {

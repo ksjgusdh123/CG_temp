@@ -23,9 +23,10 @@ void Apart::transform() {
 }
 
 void Apart::select_pos(float x, float z, int num) {
+	z = floor(-z / 2) * 2;
 	pos[0] = x;
 	pos[1] = -0.7;
-	pos[2] = z;
+	pos[2] = -z;
 	if (num % 2 == 0)
 		is_right = true;
 	else
