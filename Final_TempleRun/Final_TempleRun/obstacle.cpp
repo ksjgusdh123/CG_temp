@@ -31,7 +31,7 @@ void Truck::select_dir(int map_dir) {
 
 void Truck::set_pos(float x, float z) {
 	pos[0] = x;
-	pos[1] = 0.0;
+	pos[1] = 0.13;
 	pos[2] = z;
 }
 
@@ -48,7 +48,7 @@ void Truck::transform() {
 	else if (dir == 3)
 		TR = glm::rotate(TR, glm::radians(90.f), glm::vec3(0, 1, 0));
 	
-	TR = glm::scale(TR, glm::vec3(0.12, 0.1, 0.1));
+	TR = glm::scale(TR, glm::vec3(0.12, 0.12, 0.1));
 }
 
 

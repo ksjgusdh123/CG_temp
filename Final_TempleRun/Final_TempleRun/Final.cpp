@@ -469,6 +469,9 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		case 't':
 			camera[1] += 0.1;
 			break;
+		case 'T':
+			camera[1] -= 0.1;
+			break;
 		}
 	}
 
