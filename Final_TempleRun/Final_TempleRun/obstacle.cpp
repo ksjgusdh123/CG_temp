@@ -168,9 +168,23 @@ void Hurdle::select_dir(int map_dir) {
 }
 
 void Hurdle::set_pos(float x, float z, int num) {
-	pos[0] = x;
+	if (dir == 0 || dir == 2) {
+		if (num)
+			pos[0] = x + 0.75;
+		else
+			pos[0] = x - 0.75;
+	}
+	else
+		pos[0] = x;
 	pos[1] = -0.70;
-	pos[2] = z;
+	if (dir == 1 || dir == 3) {
+		if (num)
+			pos[2] = z + 0.75;
+		else
+			pos[2] = z - 0.75;
+	}
+	else 
+		pos[2] = z;
 }
 
 void Hurdle::transform() {
