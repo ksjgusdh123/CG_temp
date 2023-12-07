@@ -140,6 +140,8 @@ void Truck::collision(float* player_pos, Human& player) {
 	}
 }
 
+
+
 bool Hurdle::return_delete() { return is_delete; }
 
 void Hurdle::player_distance(float* player_pos) {
@@ -168,6 +170,7 @@ void Hurdle::select_dir(int map_dir) {
 }
 
 void Hurdle::set_pos(float x, float z, int num) {
+	flip = num;
 	if (dir == 0 || dir == 2) {
 		if (num)
 			pos[0] = x + 0.75;
@@ -203,8 +206,56 @@ void Hurdle::transform() {
 }
 
 void Hurdle::collision(float* player_pos, Human& player) {
-	if (player_pos[0] - 0.1 >= pos[0] - 0.5 && player_pos[0] + 0.1 <= pos[0] + 0.5) {
-		//std::cout << "立盟" << std::endl;
+	float temp_player_pos_x = round(player_pos[0] * -100) / 100;
+	float temp_player_pos_z = round(player_pos[2] * -100) / 100;
+
+	if (dir == 0 && player.return_dir() == 0) {
+		if (flip) {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (player_pos[0] < pos[0] - 0.75 && !player.return_jump())) {
+				std::cout << "立盟hurdle" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (player_pos[0] > pos[0] + 0.75 && !player.return_jump())) {
+				std::cout << "立盟hurdle" << std::endl;
+			}
+		}
+	}
+	else if (dir == 1 && (player.return_dir() == 1 || player.return_dir() == -3)) {
+		if (flip) {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && (temp_player_pos_z > pos[2] - 0.75 && !player.return_jump())) {
+				std::cout << "立盟2hurdlef" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && (temp_player_pos_z < pos[2] + 0.75 && !player.return_jump())) {
+				std::cout << "立盟2hurdle" << std::endl;
+			}
+		}
+	}
+	else if (dir == 2 && (player.return_dir() == 2 || player.return_dir() == -2)) {
+		if (flip) {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (temp_player_pos_x > pos[0] - 0.75 && !player.return_jump())) {
+				std::cout << "立盟3hurdle" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (temp_player_pos_x < pos[0] + 0.75 && !player.return_jump())) {
+				std::cout << "立盟3hurdlef" << std::endl;
+			}
+		}
+	}
+	else if (dir == 3 && (player.return_dir() == -1 || player.return_dir() == 3)) {
+		if (flip) {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && (temp_player_pos_z > pos[2] - 0.75 && !player.return_jump())) {
+				std::cout << "立盟4hurdlef" << std::endl;
+			}
+		}
+		else {
+			if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && (temp_player_pos_z < pos[2] + 0.75 && !player.return_jump())) {
+				std::cout << "立盟4hurdle" << std::endl;
+			}
+		}
 	}
 }
 

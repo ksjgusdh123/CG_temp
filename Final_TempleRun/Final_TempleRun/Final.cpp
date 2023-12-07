@@ -67,6 +67,7 @@ GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid Timer_event(int value);
 void SpecialKeyboard(int key, int x, int y);
 void specialKeyUpCallback(int key, int x, int y);
+void KeyUpCallback(unsigned char key, int x, int y);
 
 // 텍스처 관련 함수
 void init_texture_file(GLuint& texture, const char* file);
@@ -91,6 +92,7 @@ void turn_camera();
 Road road;
 int delete_num = 0;
 int map_dir = 0;
+float MAP_SIZE = 150;
 
 // 사운드
 void sound_init();
@@ -112,6 +114,7 @@ bool jump_flip = false;
 bool game_start = false;
 bool is_slide = false;
 float ambient_amount = 1;
+bool space = false;
 
 // 임시배경 큐브
 GLuint vao, vbo[3];
@@ -142,6 +145,7 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(Keyboard);
 	glutSpecialFunc(SpecialKeyboard);
 	glutSpecialUpFunc(specialKeyUpCallback);
+	glutKeyboardUpFunc(KeyUpCallback);
 
 	channel->stop();
 	channel->setVolume(1.0);
@@ -263,11 +267,11 @@ GLvoid Timer_event(int value) {
 				ob.push_back(new Truck);
 			else
 				ob.push_back(new Hurdle);
-			ob.at(i)->set_pos(0, -1 * rand_ob(dre), uid(dre));
+			ob.at(i)->set_pos(0, -10 + i * -20, uid(dre));
 		}
 	}
 
-	if (delete_num >= 80) {
+	if (delete_num >= MAP_SIZE) {
 		if (uid(dre) == 0)
 			map_dir += 1;
 		else
@@ -285,13 +289,13 @@ GLvoid Timer_event(int value) {
 
 			ob.at(i)->select_dir(map_dir);
 			if(map_dir == 0)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - rand_ob(dre), uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - max(30 * (i - temp_ob_num), 20), uid(dre));
 			else if(map_dir == 1)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + max(30 * (i - temp_ob_num), 20), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 			else if(map_dir == 2)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + rand_ob(dre), uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + max(30 * (i - temp_ob_num), 20), uid(dre));
 			else if(map_dir == 3)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - rand_ob(dre), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - max(30 * (i - temp_ob_num), 20), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 		}
 		delete_num = 0;
 	}
@@ -339,9 +343,9 @@ GLvoid Timer_event(int value) {
 
 	// 게임 시작시 자동으로 이동
 	if (game_start) {
-		if (rad[0] >= 40)
+		if (rad[0] >= 60)
 			flip = true;
-		else if (rad[0] <= -40)
+		else if (rad[0] <= -60)
 			flip = false;
 		switch (player.return_dir()) {
 		case 0:
@@ -370,19 +374,38 @@ GLvoid Timer_event(int value) {
 	// 점프
 	if (is_jump) {
 		if (jump_flip) {
-			move_character[1] -= 0.2;
-			if (move_character[1] <= 0) {
+			if (player.road_check(move_character)) {
 				move_character[1] = 0;
+				player.set_jump(false);
 				jump_flip = false;
 				is_jump = false;
 				rad[0] = 40;
 			}
+			move_character[1] += 0;
 		}
 		else {
-			move_character[1] += 0.2;
+			move_character[1] += 0.09;
 			if (move_character[1] >= 1)
 				jump_flip = true;
 			rad[0] = 80;
+		}
+	}
+
+	if (space) {
+		if (player.return_light() > 0) {
+			if (ambient_amount < 0.5)
+				ambient_amount += 0.005;
+			player.set_light(-0.05);
+		}
+		else {
+			ambient_amount = 0;
+			space = false;
+		}
+		std::cout << player.return_light() << std::endl;
+	}
+	else if (!space) {
+		if (player.return_light() < 100) {
+			player.set_light(0.01);
 		}
 	}
 	move_character[1] -= 0.05;
@@ -418,19 +441,19 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 				flip = false;
 			switch (player.return_dir()) {
 			case 0:
-				move_character[2] += 0.1;
+				move_character[2] += 0.8;
 				break;
 			case -1:
 			case 3:
-				move_character[0] += 0.1;
+				move_character[0] += 0.8;
 				break;
 			case 1: 
 			case -3:
-				move_character[0] -= 0.1;
+				move_character[0] -= 0.8;
 				break;
 			case 2:
 			case -2:
-				move_character[2] -= 0.1;
+				move_character[2] -= 0.8;
 				break;
 			}
 			if (flip)
@@ -472,9 +495,23 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		case 'T':
 			camera[1] -= 0.1;
 			break;
+		case 'k':
+			player.set_speed(0.01);
+			break;
+		case ' ':
+			if(player.return_light() > 0)
+				space = true;
+			break;
 		}
 	}
 
+}
+
+void KeyUpCallback(unsigned char key, int x, int y) {
+	if (key == ' ') {
+		space = false;
+		ambient_amount = 0;
+	}
 }
 
 void SpecialKeyboard(int key, int x, int y) {
@@ -523,8 +560,10 @@ void SpecialKeyboard(int key, int x, int y) {
 		}
 	}
 	else if (key == GLUT_KEY_UP) {
-		if (is_jump == false)
+		if (is_jump == false) {
 			is_jump = true;
+			player.set_jump(true);
+		}
 	}
 }
 

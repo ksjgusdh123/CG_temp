@@ -52,6 +52,8 @@ class Human {
 	float speed{ 0.1 };
 	float rad[3];
 	bool slide;
+	bool jump;
+	float light = 100;
 public:
 	Human();
 	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, GLuint leg_texture);
@@ -59,6 +61,11 @@ public:
 	void turn(int i);
 	int return_dir();
 	float get_speed();
-	void road_check(float* move_amount);
+	bool road_check(float* move_amount);
 	bool return_slide();
+	bool return_jump();
+	void set_jump(bool a);
+	void set_speed(float a);	
+	void set_light(float num);
+	float return_light();
 };

@@ -249,22 +249,31 @@ int Human::return_dir() { return dir; }
 
 float Human::get_speed() { return speed; }
 
-void Human::road_check(float* move_amount) {
+bool Human::road_check(float* move_amount) {
 	for (int i = 0; i < roads.size(); ++i) {
 		if (-(roads.at(i).return_pos())[0] - 1.5 < move_amount[0] && -(roads.at(i).return_pos())[0] + 1.5 > move_amount[0]
 			&& -(roads.at(i).return_pos())[2] - 1.5 < move_amount[2] && -(roads.at(i).return_pos())[2] + 1.5 > move_amount[2]
 			&& (1)){
-			if(move_amount[1] <= -0.1)
+			if (move_amount[1] <= -0.1) {
 				move_amount[1] = -0.1;
+				return true;
+			}
 		}
 	}
+	return false;
 }
 
 bool Human::return_slide() { return slide; }
 
+bool Human::return_jump() { return jump; }
 
+void Human::set_jump(bool a) { jump = a;}
 
+void Human::set_speed(float a) { speed += a;}
 
+void Human::set_light(float a) { light += a; }
+
+float Human::return_light() { return light; }
 
 
 
