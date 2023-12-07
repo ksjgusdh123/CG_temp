@@ -260,19 +260,24 @@ GLvoid drawScene() {
 			glBindVertexArray(truck_vao);
 		ob.at(i)->draw(truck_vao, modelLocation, texture);
 	}
+	/* 사람 그리기 */
+	glBindTexture(GL_TEXTURE_2D, leg_texture);
+	Draw(); // 사람을 그리는 함수
 
+	/* 아파트 그리기 */
+	glBindTexture(GL_TEXTURE_2D, leg_texture);
 	for (int i = 0; i < building.size(); ++i) {
-		building.at(i)->draw(apart_vao, modelLocation);
+		if (building.at(i)->return_dir() != player.return_dir()) {
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+		building.at(i)->draw(apart_vao, modelLocation); // 아파트를 반투명하게 그림
 	}
 
-	/*그리기*/
-	glBindTexture(GL_TEXTURE_2D, leg_texture);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
 
-	Draw();
 	glutSwapBuffers(); //--- 화면에 출력하기
+
 }
 
 GLvoid Timer_event(int value) {
@@ -292,7 +297,7 @@ GLvoid Timer_event(int value) {
 				ob.push_back(new Hurdle);
 			ob.at(i)->set_pos(0, -10 + i * -20, uid(dre));
 		}
-		for (int i = 0; i < 100; ++i) {
+		for (int i = 0; i < 189; ++i) {
 			building.push_back(new Apart);
 			building.at(i)->select_pos(0, -i, i);
 		}
