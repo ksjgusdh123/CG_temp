@@ -538,6 +538,7 @@ void Draw() {
 	int ColorLocation = glGetAttribLocation(shaderProgramID, "in_Color");
 
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "transform"); //--- 버텍스 세이더에서 모델링 변환 위치 가져오기
+
 	player.draw(head_vao, body_vao, right_arm_vao, left_arm_vao, right_leg_vao, left_leg_vao, modelLocation, leg_texture);
 }
 
@@ -715,22 +716,22 @@ void Initvbovao()
 	int ColorLocation = glGetAttribLocation(shaderProgramID, "in_Color");
 
 	//머리
-	Load_Object("resource\\character\\head.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\thief_head.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(head_vao, head_vbo);
 
-	Load_Object("resource\\character\\body.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\thief_body.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(body_vao, body_vbo);
 
-	Load_Object("resource\\character\\rightleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\thief_rightleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(right_leg_vao, right_leg_vbo);
 
-	Load_Object("resource\\character\\leftleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\thief_leftleg.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(left_leg_vao, left_leg_vbo);
 
-	Load_Object("resource\\character\\rightarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\thief_rightarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(right_arm_vao, right_arm_vbo);
 
-	Load_Object("resource\\character\\leftarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	Load_Object("resource\\character\\thief_leftarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(left_arm_vao, left_arm_vbo);
 
 	Load_Object("resource\\cube.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);

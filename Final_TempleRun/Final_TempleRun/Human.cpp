@@ -1,19 +1,21 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Human.h"
 
+float HUMAN_SIZE = 0.03;
+
 void Head::transform() {
 	TR = glm::mat4(1.0f);
 	if (is_slide) {
 		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(0, -0.34 - 0.2, -0.075 - 0.045)); //--- x축으로 이동 행렬
-		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+		TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 	}
 	else {
 		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(0, -0.34, -0.075)); //--- x축으로 이동 행렬
-		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+		TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 	}
 }
 
@@ -21,7 +23,7 @@ void Head::draw(GLuint vao, unsigned int modelLocation) {
 	Head::transform();
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 1750);
+	glDrawArrays(GL_TRIANGLES, 0, 4056);
 }
 
 void Head::get_move(float* move_amount, float* get_rad, bool slide) {
@@ -43,13 +45,13 @@ void Body::transform() {
 		TR = glm::rotate(TR, glm::radians(rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(0, -0.24, -0.075)); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(rad[0]), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+		TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 	}
 	else {
 		TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
 		TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 		TR = glm::translate(TR, glm::vec3(0, -0.24, -0.075)); //--- x축으로 이동 행렬
-		TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+		TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 	}
 }
 
@@ -57,7 +59,7 @@ void Body::draw(GLuint vao, unsigned int modelLocation) {
 	Body::transform();
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 792);
+	glDrawArrays(GL_TRIANGLES, 0, 1464);
 
 }
 
@@ -87,14 +89,14 @@ void Arm::transform() {
 			TR = glm::rotate(TR, glm::radians(rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 			TR = glm::translate(TR, glm::vec3(-0.08, -0.15, -0.1)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(10.f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 		else {
 			TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(-10.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 			TR = glm::translate(TR, glm::vec3(-0.08, -0.15, -0.08)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(-rad[0] + 10), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 	}
 	else {
@@ -103,14 +105,14 @@ void Arm::transform() {
 			TR = glm::rotate(TR, glm::radians(rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 			TR = glm::translate(TR, glm::vec3(0.08, -0.15, -0.1)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(10.f), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 		else {
 			TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 			TR = glm::translate(TR, glm::vec3(0.08, -0.15, -0.1)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(rad[0] + 60), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 	}
 }
@@ -120,9 +122,9 @@ void Arm::draw(GLuint vao, unsigned int modelLocation) {
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
 	if(is_right)
-		glDrawArrays(GL_TRIANGLES, 0, 1000);
+		glDrawArrays(GL_TRIANGLES, 0, 1848);
 	else
-		glDrawArrays(GL_TRIANGLES, 0, 2000);
+		glDrawArrays(GL_TRIANGLES, 0, 3888);
 
 }
 
@@ -152,7 +154,7 @@ void Leg::transform() {
 			TR = glm::translate(TR, glm::vec3(-0.07, -0.32, -0.1)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(-6.f), glm::vec3(0.0, 0.0, 1.0)); //--- x축에 대하여 회전 행렬
 			TR = glm::rotate(TR, glm::radians(rad[0] + 10), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 		else {
 			TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
@@ -160,7 +162,7 @@ void Leg::transform() {
 			TR = glm::translate(TR, glm::vec3(-0.02, -0.32, -0.1)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(6.f), glm::vec3(0.0, 0.0, 1.0)); //--- x축에 대하여 회전 행렬
 			TR = glm::rotate(TR, glm::radians(rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 
 	}
@@ -171,7 +173,7 @@ void Leg::transform() {
 			TR = glm::translate(TR, glm::vec3(0.02, -0.32, -0.1)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(-6.f), glm::vec3(0.0, 0.0, 1.0)); //--- x축에 대하여 회전 행렬
 			TR = glm::rotate(TR, glm::radians(rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 		else {
 			TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
@@ -179,7 +181,7 @@ void Leg::transform() {
 			TR = glm::translate(TR, glm::vec3(0.02, -0.32, -0.1)); //--- x축으로 이동 행렬
 			TR = glm::rotate(TR, glm::radians(-6.f), glm::vec3(0.0, 0.0, 1.0)); //--- x축에 대하여 회전 행렬
 			TR = glm::rotate(TR, glm::radians(-rad[0] + 20), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
-			TR = glm::scale(TR, glm::vec3(0.01, 0.01, 0.01));
+			TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 		}
 	}
 }
@@ -190,7 +192,7 @@ void Leg::draw(GLuint vao, unsigned int modelLocation, GLuint leg_texture) {
 		glBindTexture(GL_TEXTURE_2D, leg_texture);
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 438);
+	glDrawArrays(GL_TRIANGLES, 0, 2484);
 }
 
 void Leg::get_move(float* move_amount, float* get_rad, bool slide) {
