@@ -74,7 +74,7 @@ void Truck::collision(float* player_pos, Human& player) {
 	}
 	else if (dir == 1 && (player.return_dir() == 1 || player.return_dir() == -3)) {
 		if ((temp_player_pos_x >= pos[0] - 0.5 && temp_player_pos_x <= pos[0] + 0.5) && ((temp_player_pos_z >= pos[2] - 1.2 && temp_player_pos_z <= pos[2] && !player.return_slide())
-			|| (temp_player_pos_z < pos[2] - 1.2 || temp_player_pos_z > pos[2]))) {
+			|| (temp_player_pos_z < pos[2] - 1.2 || temp_player_pos_z > pos[2]))) { 
 			std::cout << "Á¢ÃË2" << std::endl;
 		}
 	}
