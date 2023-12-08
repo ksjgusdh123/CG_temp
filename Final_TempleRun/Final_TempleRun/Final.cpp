@@ -150,6 +150,8 @@ bool space = false;
 bool ambient_down = true;
 int ambient_state = 0;
 bool change = false;
+bool game_end = false;
+bool game_main = true;
 // 임시배경 큐브
 GLuint vao, vbo[3];
 
@@ -194,6 +196,8 @@ int main(int argc, char** argv) {
 }
 
 void game_init() {
+	game_end = false;
+	game_main = true;
 	y_rad = 0;
 	move_character_z = 0;
 	move_character_x = 0;
@@ -208,10 +212,6 @@ void game_init() {
 	jump_flip = false;
 	game_start = false;
 	is_slide = false;
-	ambient_amount = 1;
-	space = false;
-	ambient_down = true;
-	ambient_state = 0;
 	change = false;
 	delete_num = 40;
 	map_dir = 0;
@@ -221,6 +221,11 @@ void game_init() {
 	ob.clear();
 	player.reset_player();
 	police.police_reset();
+	ambient_amount = 1;
+	space = false;
+	ambient_down = true;
+	ambient_state = 0;
+
 }
 
 void sound_init() {
@@ -272,343 +277,371 @@ GLvoid drawScene() {
 	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform"); //--- 뷰잉 변환 설정
 	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform"); //--- 투영 변환 값 설정
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "transform"); //--- 버텍스 세이더에서 모델링 변환 위치 가져오기
-
-	// 임시 배경
-	glDisable(GL_DEPTH_TEST);
-	temp_back_ground = glm::translate(temp_back_ground, glm::vec3(0, 0, -2));
-	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 12, 6);
-
-	glEnable(GL_DEPTH_TEST);
-
-	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
-	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
-
-	projection = glm::perspective(glm::radians(30.0f), 1.0f, 0.1f, 50.0f);
-	projection = glm::translate(projection, glm::vec3(0.0 + camera[0], 0.0 + camera[1], -5.0 + camera[2]));
-	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
-
-	// 대략적인 조명 위치
-	//TR = glm::translate(TR, glm::vec3(-2 -move_character[0], 1, 1 -move_character[2]));
-	//glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
-	//glBindVertexArray(vao);
-	//glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-	// 맵 그리기
-	glBindTexture(GL_TEXTURE_2D, road_texture);
-	for (int i = 0; i < roads.size(); ++i) {
-		if (roads.at(i).return_cross() != 100) {
-			glBindTexture(GL_TEXTURE_2D, road_texture_special);
-			glBindVertexArray(road_special_vao);
-		}
-		else {
-			glBindTexture(GL_TEXTURE_2D, road_texture);
-			glBindVertexArray(road_vao);
-		}
-		roads.at(i).draw(road_vao, modelLocation);
+	if (game_main) { // 게임 처음 시작 화면
+		glDisable(GL_DEPTH_TEST);
+		temp_back_ground = glm::translate(temp_back_ground, glm::vec3(0, 0, -2));
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
+		glBindTexture(GL_TEXTURE_2D, road_texture);
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 12, 6);
 	}
+	else if (!game_end) {
+		// 임시 배경
+		glDisable(GL_DEPTH_TEST);
+		temp_back_ground = glm::translate(temp_back_ground, glm::vec3(0, 0, -2));
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 12, 6);
 
-	//장애물 그리기
-	for (int i = 0; i < ob.size(); ++i) {
-		if (dynamic_cast<Hurdle*>(ob[i])) {
-			glBindVertexArray(hurdle_vao);
-			glBindTexture(GL_TEXTURE_2D, hurdle_texture);
+		glEnable(GL_DEPTH_TEST);
+
+		view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+
+		projection = glm::perspective(glm::radians(30.0f), 1.0f, 0.1f, 50.0f);
+		projection = glm::translate(projection, glm::vec3(0.0 + camera[0], 0.0 + camera[1], -5.0 + camera[2]));
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+
+		// 대략적인 조명 위치
+		//TR = glm::translate(TR, glm::vec3(-2 -move_character[0], 1, 1 -move_character[2]));
+		//glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
+		//glBindVertexArray(vao);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+		// 맵 그리기
+		glBindTexture(GL_TEXTURE_2D, road_texture);
+		for (int i = 0; i < roads.size(); ++i) {
+			if (roads.at(i).return_cross() != 100) {
+				glBindTexture(GL_TEXTURE_2D, road_texture_special);
+				glBindVertexArray(road_special_vao);
+			}
+			else {
+				glBindTexture(GL_TEXTURE_2D, road_texture);
+				glBindVertexArray(road_vao);
+			}
+			roads.at(i).draw(road_vao, modelLocation);
 		}
-		else {
-			glBindVertexArray(truck_vao);
-			glBindTexture(GL_TEXTURE_2D, truck_texture);
+
+		//장애물 그리기
+		for (int i = 0; i < ob.size(); ++i) {
+			if (dynamic_cast<Hurdle*>(ob[i])) {
+				glBindVertexArray(hurdle_vao);
+				glBindTexture(GL_TEXTURE_2D, hurdle_texture);
+			}
+			else {
+				glBindVertexArray(truck_vao);
+				glBindTexture(GL_TEXTURE_2D, truck_texture);
+			}
+			ob.at(i)->draw(truck_vao, modelLocation, texture);
 		}
-		ob.at(i)->draw(truck_vao, modelLocation, texture);
+		/* 사람 그리기 */
+		Draw(); // 사람을 그리는 함수
+
+		/* 아파트 그리기 */
+
+		int temp_dir = player.return_dir();
+		if (temp_dir == -1)
+			temp_dir = 3;
+		else if (temp_dir == -2)
+			temp_dir = 2;
+		else if (temp_dir == -3)
+			temp_dir = 1;
+
+		for (int i = 0; i < building.size(); ++i) {
+			if (building.at(i)->return_dir() != temp_dir) {
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			}
+			if (building.at(i)->return_what()) {
+				glBindTexture(GL_TEXTURE_2D, store_texture);
+				glBindVertexArray(store_vao);
+			}
+			else {
+				glBindTexture(GL_TEXTURE_2D, apart_texture);
+				glBindVertexArray(apart_vao);
+			}
+			building.at(i)->draw(apart_vao, modelLocation); // 아파트를 반투명하게 그림
+		}
+
+		glDisable(GL_BLEND);
 	}
-	/* 사람 그리기 */
-	Draw(); // 사람을 그리는 함수
-
-	/* 아파트 그리기 */
-
-	int temp_dir = player.return_dir();
-	if (temp_dir == -1)
-		temp_dir = 3;
-	else if (temp_dir == -2)
-		temp_dir = 2;
-	else if (temp_dir == -3)
-		temp_dir = 1;
-
-	for (int i = 0; i < building.size(); ++i) {
-		if (building.at(i)->return_dir() != temp_dir) {
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-		if (building.at(i)->return_what()) {
-			glBindTexture(GL_TEXTURE_2D, store_texture);
-			glBindVertexArray(store_vao);
-		}
-		else {
-			glBindTexture(GL_TEXTURE_2D, apart_texture);
-			glBindVertexArray(apart_vao);
-		}
-		building.at(i)->draw(apart_vao, modelLocation); // 아파트를 반투명하게 그림
+	else {  // 게임 종료 시
+		glDisable(GL_DEPTH_TEST);
+		temp_back_ground = glm::translate(temp_back_ground, glm::vec3(0, 0, -2));
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 12, 6);
 	}
-
-	glDisable(GL_BLEND);
 
 	glutSwapBuffers(); //--- 화면에 출력하기
 
 }
 
 GLvoid Timer_event(int value) {
-	player.move(move_character, rad, is_slide);
-	turn_camera();
-	// 임시적으로 맵 생성
-	if (roads.size() == 0) {
-		for (int i = 0; i < 40; ++i) {
-			roads.push_back(road);
-			roads.at(i).select_pos(0, -i * 6);
-		}
-		for (int i = 0; i < 6; ++i) {
-			if (uid(dre) == 0)
-				ob.push_back(new Truck);
-			else
-				ob.push_back(new Hurdle);
-			ob.at(i)->set_pos(0,  (i+1) * -30, uid(dre));
-		}
-		for (int i = 0; i < 200; ++i) {
-			building.push_back(new Apart);
-			building.at(i)->select_pos(0, -i, i, uid(dre));
-		}
-	}
-
-
-
-	if (delete_num >= MAP_SIZE) {
-		if (uid(dre) == 0)
-			map_dir += 1;
-		else
-			map_dir -= 1;
-		if (map_dir == -1)
-			map_dir = 3;
-		else if (map_dir == 4)
-			map_dir = 0;
-		roads.at(roads.size() - 1).set_cross(map_dir);
-		int temp_ob_num = ob.size();
-		for (int i = temp_ob_num; i < 6 + temp_ob_num; ++i) {
-			if (uid(dre) == 0)
-				ob.push_back(new Truck);
-			else
-				ob.push_back(new Hurdle);
-
-			ob.at(i)->select_dir(map_dir);
-			if(map_dir == 0)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 30 * (i - temp_ob_num + 1), uid(dre));
-			else if(map_dir == 1)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + 30 * (i - temp_ob_num + 1), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
-			else if(map_dir == 2)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 30 * (i - temp_ob_num + 1), uid(dre));
-			else if(map_dir == 3)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - 30 * (i - temp_ob_num + 1), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
-		}
-
-		int temp_bd_num = building.size();
-		for (int i = temp_bd_num; i < 200 + temp_bd_num; ++i) {
-			building.push_back(new Apart);
-			building.at(i)->select_dir(map_dir);
-			if (map_dir == 0)
-				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - (i - temp_bd_num + 10), i, uid(dre));
-			else if (map_dir == 1)
-				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0] + (i - temp_bd_num + 10), (roads.at(roads.size() - 1).return_pos())[2], i, uid(dre));
-			else if (map_dir == 2)
-				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + (i - temp_bd_num + 10), i, uid(dre));
-			else if (map_dir == 3)
-				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0] - (i - temp_bd_num + 10), (roads.at(roads.size() - 1).return_pos())[2], i, uid(dre));
-		}
-
-		delete_num = 0;
-	}
-
-	// 도로 삭제 검사
-	if (roads.size() != 0) {
-		for (int i = 0; i < roads.size(); ++i) {
-			roads.at(i).player_distance(move_character, camera_dir);
-		}
-		for (int i = 0; i < roads.size(); ++i) {
-			if (roads.at(i).return_is_delete()) {
-				++delete_num;
-				road.select_dir(map_dir);
-				if(road.return_dir() == 0)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 6); // 앞으로 생성
-				else if (road.return_dir() == 2)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 6); // 앞으로 생성
-				else if (road.return_dir() == 1)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 6, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
-				else if (road.return_dir() == 3)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 6, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
-
+	if (!game_end && !game_main) {
+		player.move(move_character, rad, is_slide);
+		turn_camera();
+		// 임시적으로 맵 생성
+		if (roads.size() == 0) {
+			for (int i = 0; i < 40; ++i) {
 				roads.push_back(road);
-				roads.at(i).set_cross(100);
-				roads.erase(roads.begin() + i);
-				
-				--i;
-				if (delete_num >= MAP_SIZE) break;
+				roads.at(i).select_pos(0, -i * 6);
+			}
+			for (int i = 0; i < 6; ++i) {
+				if (uid(dre) == 0)
+					ob.push_back(new Truck);
+				else
+					ob.push_back(new Hurdle);
+				ob.at(i)->set_pos(0, (i + 1) * -30, uid(dre));
+			}
+			for (int i = 0; i < 200; ++i) {
+				building.push_back(new Apart);
+				building.at(i)->select_pos(0, -i, i, uid(dre));
 			}
 		}
-	}
 
 
-	Road temp = player.return_last();
 
-	if (temp.return_cross() == 100)
-		change = false;
+		if (delete_num >= MAP_SIZE) {
+			if (uid(dre) == 0)
+				map_dir += 1;
+			else
+				map_dir -= 1;
+			if (map_dir == -1)
+				map_dir = 3;
+			else if (map_dir == 4)
+				map_dir = 0;
+			roads.at(roads.size() - 1).set_cross(map_dir);
+			int temp_ob_num = ob.size();
+			for (int i = temp_ob_num; i < 6 + temp_ob_num; ++i) {
+				if (uid(dre) == 0)
+					ob.push_back(new Truck);
+				else
+					ob.push_back(new Hurdle);
 
-	if (temp.return_cross() != 100 && !change) {
-		change = true;
-		police.set_speed(UP_SPEED);
-		float temp = police.get_speed();
-		player.recover_speed(temp);
-		if (ambient_down) {
-			if (ambient_state == 0) {
-				ambient_amount = 0.5;
-				ambient_state = 1;
+				ob.at(i)->select_dir(map_dir);
+				if (map_dir == 0)
+					ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 30 * (i - temp_ob_num + 1), uid(dre));
+				else if (map_dir == 1)
+					ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + 30 * (i - temp_ob_num + 1), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
+				else if (map_dir == 2)
+					ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 30 * (i - temp_ob_num + 1), uid(dre));
+				else if (map_dir == 3)
+					ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - 30 * (i - temp_ob_num + 1), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 			}
-			else if (ambient_state == 1) {
-				ambient_amount = 0.0;
-				ambient_state = 2;
+
+			int temp_bd_num = building.size();
+			for (int i = temp_bd_num; i < 200 + temp_bd_num; ++i) {
+				building.push_back(new Apart);
+				building.at(i)->select_dir(map_dir);
+				if (map_dir == 0)
+					building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - (i - temp_bd_num + 10), i, uid(dre));
+				else if (map_dir == 1)
+					building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0] + (i - temp_bd_num + 10), (roads.at(roads.size() - 1).return_pos())[2], i, uid(dre));
+				else if (map_dir == 2)
+					building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + (i - temp_bd_num + 10), i, uid(dre));
+				else if (map_dir == 3)
+					building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0] - (i - temp_bd_num + 10), (roads.at(roads.size() - 1).return_pos())[2], i, uid(dre));
 			}
-			else if (ambient_state == 2)
-				ambient_down = false;
+
+			delete_num = 0;
 		}
-		else {
-			if (ambient_state == 2) {
-				ambient_amount = 0.5;
-				ambient_state = 1;
+
+		// 도로 삭제 검사
+		if (roads.size() != 0) {
+			for (int i = 0; i < roads.size(); ++i) {
+				roads.at(i).player_distance(move_character, camera_dir);
 			}
-			else if (ambient_state == 1) {
-				ambient_amount = 1;
-				ambient_state = 0;
+			for (int i = 0; i < roads.size(); ++i) {
+				if (roads.at(i).return_is_delete()) {
+					++delete_num;
+					road.select_dir(map_dir);
+					if (road.return_dir() == 0)
+						road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 6); // 앞으로 생성
+					else if (road.return_dir() == 2)
+						road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 6); // 앞으로 생성
+					else if (road.return_dir() == 1)
+						road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 6, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
+					else if (road.return_dir() == 3)
+						road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 6, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
+
+					roads.push_back(road);
+					roads.at(i).set_cross(100);
+					roads.erase(roads.begin() + i);
+
+					--i;
+					if (delete_num >= MAP_SIZE) break;
+				}
+			}
+		}
+
+
+		Road temp = player.return_last();
+
+		if (temp.return_cross() == 100)
+			change = false;
+
+		if (temp.return_cross() != 100 && !change && game_start) {
+			change = true;
+			police.set_speed(UP_SPEED);
+			float temp = police.get_speed();
+			player.recover_speed(temp);
+			player.set_speed(0.0001);
+			if (ambient_down) {
+				if (ambient_state == 0) {
+					ambient_amount = 0.5;
+					ambient_state = 1;
+				}
+				else if (ambient_state == 1) {
+					ambient_amount = 0.0;
+					ambient_state = 2;
+				}
+				else if (ambient_state == 2)
+					ambient_down = false;
 			}
 			else {
-				ambient_down = true;
-				ambient_amount = 0.5;
-				ambient_state = 1;
+				if (ambient_state == 2) {
+					ambient_amount = 0.5;
+					ambient_state = 1;
+				}
+				else if (ambient_state == 1) {
+					ambient_amount = 1;
+					ambient_state = 0;
+				}
+				else {
+					ambient_down = true;
+					ambient_amount = 0.5;
+					ambient_state = 1;
+				}
 			}
 		}
-	}
 
-	// 장애물 삭제 검사
-	if (ob.size() != 0) {
+		// 장애물 삭제 검사
+		if (ob.size() != 0) {
+			for (int i = 0; i < ob.size(); ++i) {
+				ob.at(i)->player_distance(move_character);
+			}
+			for (int i = 0; i < ob.size(); ++i) {
+				if (ob.at(i)->return_delete()) {
+					delete ob[i];
+					ob.erase(ob.begin() + i);
+				}
+			}
+		}
+
+		// 건물 삭제 검사
+		for (int i = 0; i < building.size(); ++i) {
+			building.at(i)->player_distance(move_character);
+		}
+		for (int i = 0; i < building.size(); ++i) {
+			if (building.at(i)->return_delete()) {
+				delete building[i];
+				building.erase(building.begin() + i);
+			}
+		}
+
+		// 충돌체크
 		for (int i = 0; i < ob.size(); ++i) {
-			ob.at(i)->player_distance(move_character);
+			ob.at(i)->collision(move_character, player);
 		}
-		for (int i = 0; i < ob.size(); ++i) {
-			if (ob.at(i)->return_delete()) {
-				delete ob[i];
-				ob.erase(ob.begin() + i);
+
+		// 게임 시작시 자동으로 이동
+		if (game_start) {
+			// 검거 
+			if (police.catch_thief(player, move_character)) {
+				game_end = true;
+				ambient_state = 0;
+				ambient_amount = 1;
+			}
+			police.move(player);
+			if (rad[0] >= 60)
+				flip = true;
+			else if (rad[0] <= -60)
+				flip = false;
+			switch (player.return_dir()) {
+			case 0:
+				move_character[2] += player.get_speed();
+				break;
+			case -1:
+			case 3:
+				move_character[0] += player.get_speed();
+				break;
+			case 1:
+			case -3:
+				move_character[0] -= player.get_speed();
+				break;
+			case 2:
+			case -2:
+				move_character[2] -= player.get_speed();
+				break;
+			}
+
+			if (flip && !is_jump && !is_slide)
+				rad[0] -= 2 * player.return_speed() * 10;
+			else if (!flip && !is_jump && !is_slide)
+				rad[0] += 2 * player.return_speed() * 10;
+		}
+		else
+			police.police_re();
+
+		// 점프
+		if (is_jump) {
+			if (jump_flip) {
+				if (player.road_check(move_character)) {
+					move_character[1] = 0;
+					player.set_jump(false);
+					jump_flip = false;
+					is_jump = false;
+					rad[0] = 40;
+				}
+				move_character[1] -= 0.01 * player.return_speed() * 10;
+			}
+			else {
+				move_character[1] += 0.09 * player.return_speed() * 10;
+				if (move_character[1] >= 1)
+					jump_flip = true;
+				rad[0] = 80;
 			}
 		}
-	}
 
-	// 건물 삭제 검사
-	for (int i = 0; i < building.size(); ++i) {
-		building.at(i)->player_distance(move_character);
-	}
-	for (int i = 0; i < building.size(); ++i) {
-		if (building.at(i)->return_delete()) {
-			delete building[i];
-			building.erase(building.begin() + i);
-		}
-	}
 
-	// 충돌체크
-	for (int i = 0; i < ob.size(); ++i) {
-		ob.at(i)->collision(move_character, player);
-	}
-
-	// 게임 시작시 자동으로 이동
-	if (game_start) {
-		// 검거 
-		police.catch_thief(player, move_character);
-		police.move(player);
-		if (rad[0] >= 60)
-			flip = true;
-		else if (rad[0] <= -60)
-			flip = false;
-		switch (player.return_dir()) {
-		case 0:
-			move_character[2] += player.get_speed();
-			break;
-		case -1:
-		case 3:
-			move_character[0] += player.get_speed();
-			break;
-		case 1:
-		case -3:
-			move_character[0] -= player.get_speed();
-			break;
-		case 2:
-		case -2:
-			move_character[2] -= player.get_speed();
-			break;
-		}
-
-		if (flip && !is_jump && !is_slide)
-			rad[0] -= 2 * player.return_speed() * 10;
-		else if (!flip && !is_jump && !is_slide)
-			rad[0] += 2 * player.return_speed() * 10;
-	}
-	else
-		police.police_re();
-
-	// 점프
-	if (is_jump) {
-		if (jump_flip) {
-			if (player.road_check(move_character)) {
-				move_character[1] = 0;
-				player.set_jump(false);
-				jump_flip = false;
-				is_jump = false;
-				rad[0] = 40;
+		if (space) {
+			if (player.return_light() > 0) {
+				if (ambient_amount < 0.5)
+					ambient_amount += 0.005;
+				player.set_light(-0.05);
 			}
-			move_character[1] -= 0.01 * player.return_speed() * 10;
+			else {
+				ambient_amount = 0;
+				space = false;
+			}
+			std::cout << player.return_light() << std::endl;
 		}
-		else {
-			move_character[1] += 0.09 * player.return_speed() * 10;
-			if (move_character[1] >= 1)
-				jump_flip = true;
-			rad[0] = 80;
+		else if (!space) {
+			if (player.return_light() < 100) {
+				player.set_light(0.01);
+			}
 		}
+
+
+		move_character[1] -= 0.05;
+		player.road_check(move_character);
+		player.position_setting(move_character);
+		cameraPos.x = -move_character[0] + camera_dir[0];
+		cameraPos.y = 1.5;
+		cameraPos.z = -move_character[2] + camera_dir[2];
+		cameraDirection.x = -move_character[0];
+		cameraDirection.z = -move_character[2];
 	}
-
-
-	if (space) {
-		if (player.return_light() > 0) {
-			if (ambient_amount < 0.5)
-				ambient_amount += 0.005;
-			player.set_light(-0.05);
-		}
-		else {
-			ambient_amount = 0;
-			space = false;
-		}
-		std::cout << player.return_light() << std::endl;
-	}
-	else if (!space) {
-		if (player.return_light() < 100) {
-			player.set_light(0.01);
-		}
-	}
-
-
-	move_character[1] -= 0.05;
-	player.road_check(move_character);
-	player.position_setting(move_character);
-	cameraPos.x = -move_character[0] + camera_dir[0];
-	cameraPos.y = 1.5;
-	cameraPos.z = -move_character[2] + camera_dir[2];
-	cameraDirection.x = -move_character[0];
-	cameraDirection.z = -move_character[2];
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
 	glutTimerFunc(10, Timer_event, 4);
 }
@@ -625,7 +658,8 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 				ambient_amount += 0.1;
 			break;
 		case 'p':
-			game_start = true;
+			if(!game_main)
+				game_start = true;
 			break;
 		case 'w':
 			if (rad[0] >= 90)
@@ -720,6 +754,11 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			police.set_speed(0.01);
 			break;
 		case 'r':
+			if (game_end) {
+				game_end = false;
+				game_main = true;
+			}
+			game_init();
 			game_init();
 			break;
 		case ' ':
@@ -733,18 +772,22 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 
 void KeyUpCallback(unsigned char key, int x, int y) {
 	if (key == ' ') {
-		space = false;
-		switch (ambient_state) {
-		case 0:
-			ambient_amount = 1;
-			break;
-		case 1:
-			ambient_amount = 0.5;
-			break;
-		case 2:
-			ambient_amount = 0;
-			break;
+		if (game_main)
+			game_main = false;
+		else {
+			switch (ambient_state) {
+			case 0:
+				ambient_amount = 1;
+				break;
+			case 1:
+				ambient_amount = 0.5;
+				break;
+			case 2:
+				ambient_amount = 0;
+				break;
+			}
 		}
+		space = false;
 	}
 }
 

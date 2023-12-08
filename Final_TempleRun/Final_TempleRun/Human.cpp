@@ -605,6 +605,7 @@ void Police::get_rad(float* other_rad) {
 void Police::police_reset() {
 	speed = 0.15;
 	now_dir = 0;
+	next_dir = 0;
 	for (int i = 0; i < 3; ++i) {
 		turn_point[i] = 100;
 		pos[i] = 0;
@@ -646,5 +647,7 @@ bool Police::catch_thief(Human& player, float* move_amount) {
 			break;
 		}
 	}
+	else if (now_dir == player.return_last().return_cross() && player.return_dir() != player.return_last().return_cross())
+		return true;
 	return false;
 }
