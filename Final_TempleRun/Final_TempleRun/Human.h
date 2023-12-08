@@ -77,6 +77,7 @@ public:
 	Road& return_last();
 	float return_speed();
 	void recover_speed(float);
+	void reset_player();
 };
 
 class Police {
@@ -103,4 +104,6 @@ public:
 	void get_rad(float* rad);
 	void set_turn_point(Human& player);
 	void set_speed(float a);
+	void police_reset();
+	void police_re();
 };

@@ -124,6 +124,7 @@ Road road;
 int delete_num = 40;
 int map_dir = 0;
 float MAP_SIZE = 40;
+void game_init();
 
 // 사운드
 void sound_init();
@@ -131,7 +132,7 @@ void sound_init();
 
 // 키입력 객체
 float y_rad = 0;
-float move_character[3] = { 0 };
+float move_character[3] = { 0, 0, 2 };
 float move_character_z = 0;
 float move_character_x = 0;
 float rad[3]{ 0, 540, 0 };
@@ -190,6 +191,36 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 
 	return 0;
+}
+
+void game_init() {
+	y_rad = 0;
+	move_character_z = 0;
+	move_character_x = 0;
+	move_character[0] = 0; move_character[1] = 0; move_character[2] = 2;
+	rad[0] = 0; rad[1] = 540; rad[2] = 0;
+	camera_dir[0] = 0; camera_dir[1] = 0; camera_dir[2] = 5;
+	flip = false;
+	interupt = false;
+	temp_rad = 0;
+	is_a_button = false;
+	is_jump = false;
+	jump_flip = false;
+	game_start = false;
+	is_slide = false;
+	ambient_amount = 1;
+	space = false;
+	ambient_down = true;
+	ambient_state = 0;
+	change = false;
+	delete_num = 40;
+	map_dir = 0;
+	road.select_dir(0);
+	roads.clear();
+	building.clear();
+	ob.clear();
+	player.reset_player();
+	police.police_reset();
 }
 
 void sound_init() {
@@ -266,13 +297,6 @@ GLvoid drawScene() {
 	//glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	//glBindVertexArray(vao);
 	//glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	//TR = glm::mat4(1.0f);
-	//TR = glm::translate(TR, glm::vec3(0, 2, -14));
-	//TR = glm::scale(TR, glm::vec3(0.1, 0.1, 0.1));
-	//glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
-	//glBindVertexArray(truck_vao);
-	//glDrawArrays(GL_TRIANGLES, 0, 3312);
 
 
 	// 맵 그리기
@@ -424,9 +448,11 @@ GLvoid Timer_event(int value) {
 					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 6, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
 
 				roads.push_back(road);
+				roads.at(i).set_cross(100);
 				roads.erase(roads.begin() + i);
+				
 				--i;
-				if (delete_num >= 40) break;
+				if (delete_num >= MAP_SIZE) break;
 			}
 		}
 	}
@@ -443,23 +469,23 @@ GLvoid Timer_event(int value) {
 		float temp = police.get_speed();
 		player.recover_speed(temp);
 		if (ambient_down) {
-			if (ambient_amount >= 0.9) {
+			if (ambient_state == 0) {
 				ambient_amount = 0.5;
 				ambient_state = 1;
 			}
-			else if (ambient_amount >= 0.4) {
+			else if (ambient_state == 1) {
 				ambient_amount = 0.0;
 				ambient_state = 2;
 			}
-			else if (ambient_amount <= 0.1)
+			else if (ambient_state == 2)
 				ambient_down = false;
 		}
 		else {
-			if (ambient_amount <= 0.1) {
+			if (ambient_state == 2) {
 				ambient_amount = 0.5;
 				ambient_state = 1;
 			}
-			else if (ambient_amount <= 0.6) {
+			else if (ambient_state == 1) {
 				ambient_amount = 1;
 				ambient_state = 0;
 			}
@@ -523,13 +549,15 @@ GLvoid Timer_event(int value) {
 		case -2:
 			move_character[2] -= player.get_speed();
 			break;
-		}    
-		 
+		}
+
 		if (flip && !is_jump && !is_slide)
 			rad[0] -= 2 * player.return_speed() * 10;
-		else if(!flip && !is_jump && !is_slide)
+		else if (!flip && !is_jump && !is_slide)
 			rad[0] += 2 * player.return_speed() * 10;
 	}
+	else
+		police.police_re();
 
 	// 점프
 	if (is_jump) {
@@ -686,6 +714,9 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		case 'k':
 			player.set_speed(0.01);
 			police.set_speed(0.01);
+			break;
+		case 'r':
+			game_init();
 			break;
 		case ' ':
 			if(player.return_light() > 0)

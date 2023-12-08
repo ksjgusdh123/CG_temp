@@ -450,6 +450,17 @@ Road& Human::return_last() { return last; }
 
 float Human::return_speed() { return speed; }
 
+void Human::reset_player() {
+	dir = 0;
+	speed = 0.15;
+	for (int i = 0; i < 3; ++i)
+		rad[i] = 0;
+	slide = false;
+	jump = false;
+	cross = false;
+	light = 100;
+}
+
 Police::Police() {
 	right_arm.check_right(0);
 	left_arm.check_right(1);
@@ -566,15 +577,18 @@ void Police::move(Human& player) {
 		flip = true;
 	else if (rad[0] <= -50)
 		flip = false;
+
+	police_re();
+}
+
+void Police::police_re() {
 	head.get_move(pos, rad, false);
 	body.get_move(pos, rad, false);
 	right_arm.get_move(pos, rad, false);
 	left_arm.get_move(pos, rad, false);
 	right_leg.get_move(pos, rad, false);
 	left_leg.get_move(pos, rad, false);
-
 }
-
 
 
 float Police::get_speed() {
@@ -588,3 +602,15 @@ void Police::get_rad(float* other_rad) {
 		rad[i] = other_rad[i];
 }
 
+void Police::police_reset() {
+	speed = 0.15;
+	now_dir = 0;
+	for (int i = 0; i < 3; ++i) {
+		turn_point[i] = 100;
+		pos[i] = 0;
+	}
+	pos[2] = -3;
+	rad[0] = 0; rad[1] = 540; rad[2] = 0;
+	is_police = true;
+	flip = false;
+}
