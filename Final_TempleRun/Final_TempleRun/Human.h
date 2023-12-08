@@ -94,7 +94,6 @@ class Police {
 public:
 	Police();
 	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, GLuint texture);
-	void move(float* move_amount, float* rad, bool slide);
 	void move(Human& player);
 	float get_speed();
 	void get_rad(float* rad);

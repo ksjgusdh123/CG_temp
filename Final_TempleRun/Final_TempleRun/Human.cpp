@@ -319,8 +319,8 @@ float Human::get_speed() { return speed; }
 
 bool Human::road_check(float* move_amount) {
 	for (int i = 0; i < roads.size(); ++i) {
-		if (-(roads.at(i).return_pos())[0] - 2 < move_amount[0] && -(roads.at(i).return_pos())[0] + 2 > move_amount[0]
-			&& -(roads.at(i).return_pos())[2] - 2 < move_amount[2] && -(roads.at(i).return_pos())[2] + 2 > move_amount[2]){
+		if (-(roads.at(i).return_pos())[0] - 2 <= move_amount[0] && -(roads.at(i).return_pos())[0] + 2 >= move_amount[0]
+			&& -(roads.at(i).return_pos())[2] - 2 <= move_amount[2] && -(roads.at(i).return_pos())[2] + 2 >= move_amount[2]){
 			set_road(roads.at(i));
 			if (move_amount[1] <= -0.1) {
 				move_amount[1] = -0.1;
@@ -442,6 +442,7 @@ Police::Police() {
 	left_arm.check_right(1);
 	right_leg.check_right(0);
 	left_leg.check_right(1);
+	pos[2] = -3;
 	for (int i = 0; i < 3; ++i)
 		turn_point[i] = 100;
 }
@@ -555,15 +556,6 @@ void Police::move(Human& player) {
 
 }
 
-void Police::move(float* move_amount, float* rad, bool slide) {  // юс╫ц
-	head.get_move(move_amount, rad, slide);
-	body.get_move(move_amount, rad, slide);
-	right_arm.get_move(move_amount, rad, slide);
-	left_arm.get_move(move_amount, rad, slide);
-	right_leg.get_move(move_amount, rad, slide);
-	left_leg.get_move(move_amount, rad, slide);
-
-}
 
 
 float Police::get_speed() {

@@ -294,9 +294,7 @@ GLvoid drawScene() {
 
 GLvoid Timer_event(int value) {
 	player.move(move_character, rad, is_slide);
-	police.move(move_character, rad, is_slide);
 	turn_camera();
-	police.move(player);
 	// 임시적으로 맵 생성
 	if (roads.size() == 0) {
 		for (int i = 0; i < 40; ++i) {
@@ -404,6 +402,7 @@ GLvoid Timer_event(int value) {
 
 	// 게임 시작시 자동으로 이동
 	if (game_start) {
+		police.move(player);
 		if (rad[0] >= 60)
 			flip = true;
 		else if (rad[0] <= -60)
