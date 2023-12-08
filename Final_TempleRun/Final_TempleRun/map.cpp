@@ -12,14 +12,14 @@ void Road::select_pos(float x, float z) {
 void Road::transform() {
 	TR = glm::mat4(1.0f);
 	TR = glm::translate(TR, glm::vec3(pos[0], pos[1], pos[2]));
-	TR = glm::scale(TR, glm::vec3(2, 1.0, 2));
+	TR = glm::scale(TR, glm::vec3(3, 1.0, 3));
 }
 
 void Road::draw(GLuint vao, unsigned int modelLocation) {
 	Road::transform();
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawArrays(GL_TRIANGLES, 0, 264);
 }
 
 void Road::player_distance(float* player_pos, int* camera_dir) {

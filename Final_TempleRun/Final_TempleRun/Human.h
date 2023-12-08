@@ -11,35 +11,36 @@ protected:
 
 class Head : public Part {
 public:
-	void draw(GLuint, unsigned int);
-	void transform();
+	void draw(GLuint, unsigned int, bool);
+	void transform(bool);
 	void get_move(float*, float*, bool);
 };	
 
 class Arm : public Part {
 	bool is_right;
 public:
-	void draw(GLuint, unsigned int);
+	void draw(GLuint, unsigned int, bool);
 	void check_right(int i);
-	void transform();
+	void transform(bool);
 	void get_move(float*, float*, bool);
 };
 
 class Leg : public Part {
 	bool is_right;
 public:
-	void draw(GLuint, unsigned int, GLuint);
+	void draw(GLuint, unsigned int, GLuint, bool);
 	void check_right(int i);
-	void transform();
+	void transform(bool);
 	void get_move(float*, float*, bool);
 };
 
 class Body : public Part {
 public:
-	void draw(GLuint, unsigned int);
-	void transform();
+	void draw(GLuint, unsigned int, bool);
+	void transform(bool);
 	void get_move(float*, float*, bool);
 };
+
 
 class Human {
 	Head head;
@@ -72,4 +73,31 @@ public:
 	float return_light();
 	void set_road(Road&);
 	void position_setting(float*);
+	Road& return_last();
+};
+
+class Police {
+	Head head;
+	Body body;
+	Arm left_arm;
+	Arm right_arm;
+	Leg left_leg;
+	Leg right_leg;
+	float speed{ 0.1 };
+	int now_dir;
+	int next_dir;
+	float pos[3];
+	float rad[3]{ 0, 540, 0 };
+	float turn_point[3];
+	bool is_police = true;
+	bool flip = false;
+public:
+	Police();
+	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, GLuint texture);
+	void move(float* move_amount, float* rad, bool slide);
+	void move(Human& player);
+	float get_speed();
+	void get_rad(float* rad);
+	void set_turn_point(Human& player);
+	void set_speed(float a);
 };

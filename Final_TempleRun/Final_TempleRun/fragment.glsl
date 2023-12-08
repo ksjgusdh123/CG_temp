@@ -36,7 +36,8 @@ void main()
     float dist = distance(lightPos, FragPos);
     vec3 result = ambient * objectColor + (diffuse + specular) * (objectColor / (dist));
 
-    fragmentColor = vec4(result, 0.3);
+    fragmentColor = vec4(result, 0.5);
+
     fragmentColor = texture(outTexture, TexCoord) * fragmentColor;
 
 }

@@ -4,6 +4,8 @@ layout (location = 0) in vec3 positionAttribute;
 layout (location = 1) in vec3 vNormal;
 layout (location = 2) in vec2 vTexCoord;
 
+out vec3 test;
+
 out vec3 passColorAttribute;
 out vec3 Normal;
 out vec3 FragPos;
@@ -23,4 +25,6 @@ void main()
 	trans = transform;
 	Normal = vNormal;
 	TexCoord = vTexCoord;
+
+	test = positionAttribute;
 };
