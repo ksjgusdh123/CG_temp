@@ -319,8 +319,8 @@ float Human::get_speed() { return speed; }
 
 bool Human::road_check(float* move_amount) {
 	for (int i = 0; i < roads.size(); ++i) {
-		if (-(roads.at(i).return_pos())[0] - 2 <= move_amount[0] && -(roads.at(i).return_pos())[0] + 2 >= move_amount[0]
-			&& -(roads.at(i).return_pos())[2] - 2 <= move_amount[2] && -(roads.at(i).return_pos())[2] + 2 >= move_amount[2]){
+		if (-(roads.at(i).return_pos())[0] - 3 < move_amount[0] && -(roads.at(i).return_pos())[0] + 3 > move_amount[0]
+			&& -(roads.at(i).return_pos())[2] - 3 < move_amount[2] && -(roads.at(i).return_pos())[2] + 3 > move_amount[2]){
 			set_road(roads.at(i));
 			if (move_amount[1] <= -0.1) {
 				move_amount[1] = -0.1;

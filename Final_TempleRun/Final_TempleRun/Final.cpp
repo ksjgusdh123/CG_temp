@@ -256,11 +256,8 @@ GLvoid drawScene() {
 
 
 	// 맵 그리기
+	glBindTexture(GL_TEXTURE_2D, road_texture);
 	for (int i = 0; i < roads.size(); ++i) {
-		if(roads.at(i).return_dir() == 0 || roads.at(i).return_dir() == 2)
-			glBindTexture(GL_TEXTURE_2D, road_texture);
-		else
-			glBindTexture(GL_TEXTURE_2D, road_texture_horizon);
 		roads.at(i).draw(road_vao, modelLocation);
 	}
 
@@ -299,7 +296,7 @@ GLvoid Timer_event(int value) {
 	if (roads.size() == 0) {
 		for (int i = 0; i < 40; ++i) {
 			roads.push_back(road);
-			roads.at(i).select_pos(0, -i * 4);
+			roads.at(i).select_pos(0, -i * 6);
 		}
 		for (int i = 0; i < 5; ++i) {
 			if (uid(dre) == 0)
@@ -355,13 +352,13 @@ GLvoid Timer_event(int value) {
 				++delete_num;
 				road.select_dir(map_dir);
 				if(road.return_dir() == 0)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 4); // 앞으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 6); // 앞으로 생성
 				else if (road.return_dir() == 2)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 4); // 앞으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 6); // 앞으로 생성
 				else if (road.return_dir() == 1)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 4, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] + 6, (roads.at(roads.size() - 1).return_pos())[2]); // 오른쪽으로 생성
 				else if (road.return_dir() == 3)
-					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 4, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
+					road.select_pos((roads.at(roads.size() - 1).return_pos())[0] - 6, (roads.at(roads.size() - 1).return_pos())[2]); // 왼쪽으로 생성
 
 				roads.push_back(road);
 				roads.erase(roads.begin() + i);
@@ -681,8 +678,8 @@ void InitTexture()
 {
 	init_texture_file(texture, "image\\temp_city.jpg");
 	init_texture_file(thief_texture, "resource\\texture\\thief\\thief_head.png");
-	init_texture_file(road_texture, "image\\temp_road3.jpg");
-	init_texture_file(road_texture_horizon, "image\\temp_road3_horizon.jpg");
+	init_texture_file(road_texture, "resource\\texture\\ob\\road.png");
+	init_texture_file(road_texture_horizon, "resource\\texture\\ob\\road_horizon.png");
 }
 
 
