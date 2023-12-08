@@ -112,6 +112,7 @@ void Draw();
 void gen_vao(GLuint& vao, GLuint* vbo);
 
 // player객체
+float UP_SPEED = 0.02;
 Human player;
 void turn_camera();
 
@@ -145,7 +146,9 @@ bool game_start = false;
 bool is_slide = false;
 float ambient_amount = 1;
 bool space = false;
-
+bool ambient_down = true;
+int ambient_state = 0;
+bool change = false;
 // 임시배경 큐브
 GLuint vao, vbo[3];
 
@@ -342,12 +345,12 @@ GLvoid Timer_event(int value) {
 			roads.push_back(road);
 			roads.at(i).select_pos(0, -i * 6);
 		}
-		for (int i = 0; i < 5; ++i) {
+		for (int i = 0; i < 6; ++i) {
 			if (uid(dre) == 0)
 				ob.push_back(new Truck);
 			else
 				ob.push_back(new Hurdle);
-			ob.at(i)->set_pos(0, -10 + i * -20, uid(dre));
+			ob.at(i)->set_pos(0,  (i+1) * -30, uid(dre));
 		}
 		for (int i = 0; i < 200; ++i) {
 			building.push_back(new Apart);
@@ -368,7 +371,7 @@ GLvoid Timer_event(int value) {
 			map_dir = 0;
 		roads.at(roads.size() - 1).set_cross(map_dir);
 		int temp_ob_num = ob.size();
-		for (int i = temp_ob_num; i < 5 + temp_ob_num; ++i) {
+		for (int i = temp_ob_num; i < 6 + temp_ob_num; ++i) {
 			if (uid(dre) == 0)
 				ob.push_back(new Truck);
 			else
@@ -376,13 +379,13 @@ GLvoid Timer_event(int value) {
 
 			ob.at(i)->select_dir(map_dir);
 			if(map_dir == 0)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - max(30 * (i - temp_ob_num), 20), uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - 30 * (i - temp_ob_num + 1), uid(dre));
 			else if(map_dir == 1)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + max(30 * (i - temp_ob_num), 20), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] + 30 * (i - temp_ob_num + 1), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 			else if(map_dir == 2)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + max(30 * (i - temp_ob_num), 20), uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + 30 * (i - temp_ob_num + 1), uid(dre));
 			else if(map_dir == 3)
-				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - max(30 * (i - temp_ob_num), 20), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
+				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - 30 * (i - temp_ob_num + 1), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 		}
 
 		int temp_bd_num = building.size();
@@ -424,6 +427,46 @@ GLvoid Timer_event(int value) {
 				roads.erase(roads.begin() + i);
 				--i;
 				if (delete_num >= 40) break;
+			}
+		}
+	}
+
+
+	Road temp = player.return_last();
+
+	if (temp.return_cross() == 100)
+		change = false;
+
+	if (temp.return_cross() != 100 && !change) {
+		change = true;
+		police.set_speed(UP_SPEED);
+		float temp = police.get_speed();
+		player.recover_speed(temp);
+		if (ambient_down) {
+			if (ambient_amount >= 0.9) {
+				ambient_amount = 0.5;
+				ambient_state = 1;
+			}
+			else if (ambient_amount >= 0.4) {
+				ambient_amount = 0.0;
+				ambient_state = 2;
+			}
+			else if (ambient_amount <= 0.1)
+				ambient_down = false;
+		}
+		else {
+			if (ambient_amount <= 0.1) {
+				ambient_amount = 0.5;
+				ambient_state = 1;
+			}
+			else if (ambient_amount <= 0.6) {
+				ambient_amount = 1;
+				ambient_state = 0;
+			}
+			else {
+				ambient_down = true;
+				ambient_amount = 0.5;
+				ambient_state = 1;
 			}
 		}
 	}
@@ -656,7 +699,17 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 void KeyUpCallback(unsigned char key, int x, int y) {
 	if (key == ' ') {
 		space = false;
-		ambient_amount = 0;
+		switch (ambient_state) {
+		case 0:
+			ambient_amount = 1;
+			break;
+		case 1:
+			ambient_amount = 0.5;
+			break;
+		case 2:
+			ambient_amount = 0;
+			break;
+		}
 	}
 }
 

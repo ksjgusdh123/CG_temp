@@ -3,6 +3,8 @@
 
 float HUMAN_SIZE = 0.025;
 
+float GAP = 1.45;
+
 void Head::transform(bool is_police) {
 	TR = glm::mat4(1.0f);
 	if (is_police) {
@@ -355,89 +357,91 @@ void Human::set_road(Road& ro) {
 	last = ro;
 }
 
+void Human::recover_speed(float sp) { speed = sp; }
+
 void Human::position_setting(float* move_amount) {
 	float* temp = last.return_pos();
 	int num = 0;
 	if (last.return_cross() == 0) {
 		if (last.return_dir() == 1) {
-			if (move_amount[2] <= -(temp[2] + 1.7)) //2
-				move_amount[2] = -(temp[2] + 1.7);
-			if (move_amount[0] <= -(temp[0] + 1.7))  // 1
-				move_amount[0] = -(temp[0] + 1.7);
+			if (move_amount[2] <= -(temp[2] + GAP)) //2
+				move_amount[2] = -(temp[2] + GAP);
+			if (move_amount[0] <= -(temp[0] + GAP))  // 1
+				move_amount[0] = -(temp[0] + GAP);
 		}
 		else if (last.return_dir() == 3) {
-			if (move_amount[2] <= -(temp[2] + 1.7)) //2
-				move_amount[2] = -(temp[2] + 1.7);
-			if (move_amount[0] >= -(temp[0] - 1.7))  // 3
-				move_amount[0] = -(temp[0] - 1.7);
+			if (move_amount[2] <= -(temp[2] + GAP)) //2
+				move_amount[2] = -(temp[2] + GAP);
+			if (move_amount[0] >= -(temp[0] - GAP))  // 3
+				move_amount[0] = -(temp[0] - GAP);
 		}
 	}
 	else if (last.return_cross() == 1) {
 		if (last.return_dir() == 0) {
-			if (move_amount[0] >= -(temp[0] - 1.7))  // 3
-				move_amount[0] = -(temp[0] - 1.7);
-			if (move_amount[2] >= -(temp[2] - 1.7)) // 0
-				move_amount[2] = -(temp[2] - 1.7);
+			if (move_amount[0] >= -(temp[0] - GAP))  // 3
+				move_amount[0] = -(temp[0] - GAP);
+			if (move_amount[2] >= -(temp[2] - GAP)) // 0
+				move_amount[2] = -(temp[2] - GAP);
 		}
 		else if (last.return_dir() == 2) {
-			if (move_amount[0] >= -(temp[0] - 1.7))  // 3
-				move_amount[0] = -(temp[0] - 1.7);
-			if (move_amount[2] <= -(temp[2] + 1.7)) //2
-				move_amount[2] = -(temp[2] + 1.7);
+			if (move_amount[0] >= -(temp[0] - GAP))  // 3
+				move_amount[0] = -(temp[0] - GAP);
+			if (move_amount[2] <= -(temp[2] + GAP)) //2
+				move_amount[2] = -(temp[2] + GAP);
 		}
 	}
 	else if (last.return_cross() == 2) {
 		if (last.return_dir() == 1) {
-			if (move_amount[0] <= -(temp[0] + 1.7))  // 1
-				move_amount[0] = -(temp[0] + 1.7);
-			if (move_amount[2] >= -(temp[2] - 1.7)) // 0
-				move_amount[2] = -(temp[2] - 1.7);
+			if (move_amount[0] <= -(temp[0] + GAP))  // 1
+				move_amount[0] = -(temp[0] + GAP);
+			if (move_amount[2] >= -(temp[2] - GAP)) // 0
+				move_amount[2] = -(temp[2] - GAP);
 		}
 		else if (last.return_dir() == 3) {
-			if (move_amount[0] >= -(temp[0] - 1.7))  // 3
-				move_amount[0] = -(temp[0] - 1.7);
-			if (move_amount[2] >= -(temp[2] - 1.7)) // 0
-				move_amount[2] = -(temp[2] - 1.7);
+			if (move_amount[0] >= -(temp[0] - GAP))  // 3
+				move_amount[0] = -(temp[0] - GAP);
+			if (move_amount[2] >= -(temp[2] - GAP)) // 0
+				move_amount[2] = -(temp[2] - GAP);
 		}
 	}
 	else if (last.return_cross() == 3) {
 		if (last.return_dir() == 0) {
-			if (move_amount[0] <= -(temp[0] + 1.7))  // 1
-				move_amount[0] = -(temp[0] + 1.7);
-			if (move_amount[2] >= -(temp[2] - 1.7)) // 0
-				move_amount[2] = -(temp[2] - 1.7);
+			if (move_amount[0] <= -(temp[0] + GAP))  // 1
+				move_amount[0] = -(temp[0] + GAP);
+			if (move_amount[2] >= -(temp[2] - GAP)) // 0
+				move_amount[2] = -(temp[2] - GAP);
 		}
 		else if (last.return_dir() == 2) {
-			if (move_amount[0] <= -(temp[0] + 1.7))  // 1
-				move_amount[0] = -(temp[0] + 1.7);
-			if (move_amount[2] <= -(temp[2] + 1.7)) //2
-				move_amount[2] = -(temp[2] + 1.7);
+			if (move_amount[0] <= -(temp[0] + GAP))  // 1
+				move_amount[0] = -(temp[0] + GAP);
+			if (move_amount[2] <= -(temp[2] + GAP)) //2
+				move_amount[2] = -(temp[2] + GAP);
 		}
 	}
 	else {
 		if (last.return_dir() == 0) {
-			if (move_amount[0] <= -(temp[0] + 1.7))  // 1
-				move_amount[0] = -(temp[0] + 1.7);
-			else if (move_amount[0] >= -(temp[0] - 1.7)) // 3
-				move_amount[0] = -(temp[0] - 1.7);
+			if (move_amount[0] <= -(temp[0] + GAP))  // 1
+				move_amount[0] = -(temp[0] + GAP);
+			else if (move_amount[0] >= -(temp[0] - GAP)) // 3
+				move_amount[0] = -(temp[0] - GAP);
 		}
 		else if (last.return_dir() == 1) {
-			if (move_amount[2] >= -(temp[2] - 1.7)) // 0
-				move_amount[2] = -(temp[2] - 1.7);
-			else if (move_amount[2] <= -(temp[2] + 1.7)) //2
-				move_amount[2] = -(temp[2] + 1.7);
+			if (move_amount[2] >= -(temp[2] - GAP)) // 0
+				move_amount[2] = -(temp[2] - GAP);
+			else if (move_amount[2] <= -(temp[2] + GAP)) //2
+				move_amount[2] = -(temp[2] + GAP);
 		}
 		else if (last.return_dir() == 2) {
-			if (move_amount[0] <= -(temp[0] + 1.7))  // 1
-				move_amount[0] = -(temp[0] + 1.7);
-			else if (move_amount[0] >= -(temp[0] - 1.7)) // 3
-				move_amount[0] = -(temp[0] - 1.7);
+			if (move_amount[0] <= -(temp[0] + GAP))  // 1
+				move_amount[0] = -(temp[0] + GAP);
+			else if (move_amount[0] >= -(temp[0] - GAP)) // 3
+				move_amount[0] = -(temp[0] - GAP);
 		}
 		else if (last.return_dir() == 3) {
-			if (move_amount[2] >= -(temp[2] - 1.7)) // 0
-				move_amount[2] = -(temp[2] - 1.7);
-			else if (move_amount[2] <= -(temp[2] + 1.7)) //2
-				move_amount[2] = -(temp[2] + 1.7);
+			if (move_amount[2] >= -(temp[2] - GAP)) // 0
+				move_amount[2] = -(temp[2] - GAP);
+			else if (move_amount[2] <= -(temp[2] + GAP)) //2
+				move_amount[2] = -(temp[2] + GAP);
 		}
 	}
 }
@@ -574,7 +578,7 @@ void Police::move(Human& player) {
 
 
 float Police::get_speed() {
-	return 0;	
+	return speed;
 }
 
 void Police::set_speed(float a) { speed += a; }

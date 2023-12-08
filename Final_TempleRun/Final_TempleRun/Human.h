@@ -51,7 +51,7 @@ class Human {
 	Leg right_leg;	
 	Road last;
 	int dir;
-	float speed{ 0.1 };
+	float speed{ 0.15 };
 	float rad[3];
 	bool slide;
 	bool jump;
@@ -76,6 +76,7 @@ public:
 	void position_setting(float*);
 	Road& return_last();
 	float return_speed();
+	void recover_speed(float);
 };
 
 class Police {
@@ -85,7 +86,7 @@ class Police {
 	Arm right_arm;
 	Leg left_leg;
 	Leg right_leg;
-	float speed{ 0.1 };
+	float speed{ 0.15 };
 	int now_dir;
 	int next_dir;
 	float pos[3];

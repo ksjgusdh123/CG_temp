@@ -10,6 +10,7 @@ protected:
 	float rad[3];
 	bool is_delete = false;
 	int flip;
+	bool is_collide = false;
 
 public:
 	virtual void draw(GLuint vao, unsigned int modelLocation, GLuint leg_texture) = 0;
