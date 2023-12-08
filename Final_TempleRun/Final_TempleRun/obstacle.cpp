@@ -75,7 +75,7 @@ void Truck::draw(GLuint vao, unsigned int modelLocation, GLuint texture) {
 	glDrawArrays(GL_TRIANGLES, 0, 3312);
 }
 
-void Truck::collision(float* player_pos, Human& player) {
+bool Truck::collision(float* player_pos, Human& player) {
 
 	float DOWN_SPEED = -0.0005 * player.get_speed() * 50;
 
@@ -156,7 +156,9 @@ void Truck::collision(float* player_pos, Human& player) {
 				}
 			}
 		}
+		return is_collide;
 	}
+	return false;
 }
 
 
@@ -224,7 +226,7 @@ void Hurdle::transform() {
 
 }
 
-void Hurdle::collision(float* player_pos, Human& player) {
+bool Hurdle::collision(float* player_pos, Human& player) {
 	float temp_player_pos_x = round(player_pos[0] * -100) / 100;
 	float temp_player_pos_z = round(player_pos[2] * -100) / 100;
 
@@ -296,7 +298,9 @@ void Hurdle::collision(float* player_pos, Human& player) {
 				}
 			}
 		}
+		return is_collide;
 	}
+	return false;
 }
 
 void Hurdle::draw(GLuint vao, unsigned int modelLocation, GLuint texture) {

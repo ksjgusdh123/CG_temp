@@ -86,6 +86,7 @@ GLuint apart_texture;
 GLuint store_texture;
 GLuint truck_texture;
 GLuint hurdle_texture;
+GLuint red_texture;
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -378,6 +379,32 @@ GLvoid drawScene() {
 		}
 
 		glDisable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		TR = glm::mat4(1.0f);
+		view = glm::mat4(1.0f);
+		projection = glm::mat4(1.0f);
+		view = glm::mat4(1.0f);
+		projection = glm::mat4(1.0f);
+		TR = glm::translate(TR, glm::vec3(0.7, 0.8, 0));
+		TR = glm::scale(TR, glm::vec3(0.2, 0.07, 0.5));
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 12, 6);
+
+		glBindTexture(GL_TEXTURE_2D, red_texture);
+		TR = glm::mat4(1.0f);
+		TR = glm::translate(TR, glm::vec3(0.7 - (100 - player.return_light()) * 0.002, 0.8, 0));
+		TR = glm::scale(TR, glm::vec3(0.2 - (100 - player.return_light()) * 0.002, 0.07, 0.5));
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 12, 6);
+
 	}
 	else {  // 게임 종료 시
 		glDisable(GL_DEPTH_TEST);
@@ -559,7 +586,10 @@ GLvoid Timer_event(int value) {
 
 		// 충돌체크
 		for (int i = 0; i < ob.size(); ++i) {
-			ob.at(i)->collision(move_character, player);
+			if (ob.at(i)->collision(move_character, player)) {
+				ssystem->playSound(sound_effect[3], 0, false, &channel[2]);
+				ssystem->update();
+			}
 		}
 
 		// 게임 시작시 자동으로 이동
@@ -631,7 +661,17 @@ GLvoid Timer_event(int value) {
 				player.set_light(-0.05);
 			}
 			else {
-				ambient_amount = 0;
+				switch (ambient_state) {
+				case 0:
+					ambient_amount = 1;
+					break;
+				case 1:
+					ambient_amount = 0.5;
+					break;
+				case 2:
+					ambient_amount = 0;
+					break;
+				}
 				space = false;
 			}
 			std::cout << player.return_light() << std::endl;
@@ -911,6 +951,7 @@ void InitTexture()
 	init_texture_file(hurdle_texture, "resource\\texture\\ob\\fence.png");
 	init_texture_file(apart_texture, "resource\\texture\\ob\\apart.png");
 	init_texture_file(store_texture, "resource\\texture\\ob\\store.png");
+	init_texture_file(red_texture, "resource\\texture\\red.png");
 
 }
 
