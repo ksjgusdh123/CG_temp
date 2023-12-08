@@ -13,8 +13,8 @@
 
 // FMOD
 FMOD::System* ssystem;
-FMOD::Sound* sound1, * sound2;
-FMOD::Channel* channel = 0;
+FMOD::Sound* sound[3], * sound_effect[5];
+FMOD::Channel* channel[3] = { 0 };
 FMOD_RESULT result;
 void* extradriverdata = 0;
 
@@ -152,6 +152,7 @@ int ambient_state = 0;
 bool change = false;
 bool game_end = false;
 bool game_main = true;
+bool is_first = false;
 // 임시배경 큐브
 GLuint vao, vbo[3];
 
@@ -185,10 +186,10 @@ int main(int argc, char** argv) {
 	glutSpecialUpFunc(specialKeyUpCallback);
 	glutKeyboardUpFunc(KeyUpCallback);
 
-	channel->stop();
-	channel->setVolume(1.0);
+	channel[0]->stop();
+	channel[0]->setVolume(1.0);
 	ssystem->update();
-	//ssystem->playSound(sound1, 0, false, &channel);
+	ssystem->playSound(sound[0], 0, false, &channel[0]);
 	glutTimerFunc(100, Timer_event, 4);
 	glutMainLoop();
 
@@ -230,7 +231,14 @@ void game_init() {
 
 void sound_init() {
 	ssystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	ssystem->createSound("sound\\main_bgm.mp3", FMOD_LOOP_NORMAL, 0, &sound1);
+	ssystem->createSound("sound\\main_bgm_cc.mp3", FMOD_LOOP_NORMAL, 0, &sound[0]);
+	ssystem->createSound("sound\\game_bgm.mp3", FMOD_LOOP_NORMAL, 0, &sound[1]);
+	ssystem->createSound("sound\\wasted.mp3", FMOD_LOOP_OFF, 0, &sound[2]);
+	ssystem->createSound("sound\\siren.mp3", FMOD_LOOP_OFF, 0, &sound_effect[0]);
+	ssystem->createSound("sound\\jump.mp3", FMOD_LOOP_OFF, 0, &sound_effect[1]);
+	ssystem->createSound("sound\\slide.mp3", FMOD_LOOP_OFF, 0, &sound_effect[2]);
+	ssystem->createSound("sound\\damaged.mp3", FMOD_LOOP_OFF, 0, &sound_effect[3]);
+
 	ssystem->update();
 }
 
@@ -561,6 +569,8 @@ GLvoid Timer_event(int value) {
 				game_end = true;
 				ambient_state = 0;
 				ambient_amount = 1;
+				channel[0]->stop();
+				ssystem->playSound(sound[2], 0, false, &channel[0]);
 			}
 			police.move(player);
 			if (rad[0] >= 60)
@@ -658,8 +668,12 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 				ambient_amount += 0.1;
 			break;
 		case 'p':
-			if(!game_main)
+			if (!game_main && !game_start) {
 				game_start = true;
+				channel[0]->stop();
+				ssystem->playSound(sound[1], 0, false, &channel[0]);
+				ssystem->playSound(sound_effect[0], 0, false, &channel[1]);
+			}
 			break;
 		case 'w':
 			if (rad[0] >= 90)
@@ -754,11 +768,12 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			police.set_speed(0.01);
 			break;
 		case 'r':
+			channel[0]->stop();
+			ssystem->playSound(sound[0], 0, false, &channel[0]);
 			if (game_end) {
 				game_end = false;
 				game_main = true;
 			}
-			game_init();
 			game_init();
 			break;
 		case ' ':
@@ -772,8 +787,10 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 
 void KeyUpCallback(unsigned char key, int x, int y) {
 	if (key == ' ') {
-		if (game_main)
+		if (game_main) {
 			game_main = false;
+			channel[0]->stop();
+		}
 		else {
 			switch (ambient_state) {
 			case 0:
@@ -832,12 +849,18 @@ void SpecialKeyboard(int key, int x, int y) {
 	}
 	else if (key == GLUT_KEY_DOWN) {
 		if (!is_jump) {
+			if (!is_first) {
+				ssystem->playSound(sound_effect[2], 0, false, &channel[2]);
+				is_first = true;
+			}
 			is_slide = true;
 			rad[0] = -90;
 		}
 	}
 	else if (key == GLUT_KEY_UP) {
 		if (is_jump == false) {
+			ssystem->playSound(sound_effect[1], 0, false, &channel[2]);
+
 			is_jump = true;
 			player.set_jump(true);
 		}
@@ -848,6 +871,7 @@ void SpecialKeyboard(int key, int x, int y) {
 void specialKeyUpCallback(int key, int x, int y) {
 	if (key == GLUT_KEY_DOWN) {
 		is_slide = false;
+		is_first = false;
 		rad[0] = 0;
 	}
 }
