@@ -614,3 +614,37 @@ void Police::police_reset() {
 	is_police = true;
 	flip = false;
 }
+
+float* Police::return_pos() { return pos; }
+
+bool Police::catch_thief(Human& player, float* move_amount) {
+	if (now_dir == player.return_last().return_dir()) {
+		switch (now_dir) {
+		case 0:
+			if (pos[2] >= move_amount[2]) {
+				std::cout << "잡았다" << std::endl;
+				return true;
+			}
+			break;
+		case 1:
+			if (pos[0] <= move_amount[0]) {
+				std::cout << "잡았다" << std::endl;
+				return true;
+			}
+			break;
+		case 2:
+			if (pos[2] <= move_amount[2]) {
+				std::cout << "잡았다" << std::endl;
+				return true;
+			}
+			break;
+		case 3:
+			if (pos[0] >= move_amount[0]) {
+				std::cout << "잡았다" << std::endl;
+				return true;
+			}
+			break;
+		}
+	}
+	return false;
+}

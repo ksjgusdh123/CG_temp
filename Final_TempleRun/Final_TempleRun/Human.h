@@ -106,4 +106,6 @@ public:
 	void set_speed(float a);
 	void police_reset();
 	void police_re();
+	float* return_pos();
+	bool catch_thief(Human& player, float*);
 };

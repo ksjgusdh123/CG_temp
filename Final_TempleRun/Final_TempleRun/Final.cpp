@@ -528,6 +528,8 @@ GLvoid Timer_event(int value) {
 
 	// 게임 시작시 자동으로 이동
 	if (game_start) {
+		// 검거 
+		police.catch_thief(player, move_character);
 		police.move(player);
 		if (rad[0] >= 60)
 			flip = true;
@@ -597,6 +599,8 @@ GLvoid Timer_event(int value) {
 			player.set_light(0.01);
 		}
 	}
+
+
 	move_character[1] -= 0.05;
 	player.road_check(move_character);
 	player.position_setting(move_character);
