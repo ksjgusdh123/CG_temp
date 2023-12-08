@@ -70,7 +70,6 @@ void Truck::transform() {
 
 void Truck::draw(GLuint vao, unsigned int modelLocation, GLuint texture) {
 	Truck::transform();
-	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glDrawArrays(GL_TRIANGLES, 0, 3312);
 }
@@ -261,7 +260,6 @@ void Hurdle::collision(float* player_pos, Human& player) {
 
 void Hurdle::draw(GLuint vao, unsigned int modelLocation, GLuint texture) {
 	Hurdle::transform();
-	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 	glDrawArrays(GL_TRIANGLES, 0, 2568);
 }

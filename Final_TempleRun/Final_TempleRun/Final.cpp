@@ -22,6 +22,7 @@ void* extradriverdata = 0;
 random_device rd;
 std::mt19937 dre(rd());
 std::uniform_int_distribution<int> uid{ 0, 1 };
+std::uniform_int_distribution<int> uid2{ 0, 2 };
 std::uniform_int_distribution<int> rand_ob{ 10, 70 };
 
 unsigned int head_vao, head_vbo[3];
@@ -33,7 +34,9 @@ unsigned int right_arm_vao, right_arm_vbo[3];
 unsigned int left_leg_vao, left_leg_vbo[3];
 unsigned int right_leg_vao, right_leg_vbo[3];
 unsigned int apart_vao, apart_vbo[3];
+unsigned int store_vao, store_vbo[3];
 unsigned int road_vao, road_vbo[3];
+unsigned int road_special_vao, road_special_vbo[3];
 unsigned int police_head_vao, police_head_vbo[3];
 unsigned int police_body_vao, police_body_vbo[3];
 unsigned int police_left_arm_vao, police_left_arm_vbo[3];
@@ -65,10 +68,24 @@ GLuint vertexShader;
 GLuint fragmentShader;
 GLchar* vertexSource, * fragmentSource;
 GLuint texture;
-GLuint thief_texture;
+GLuint thief_head_texture;
+GLuint thief_body_texture;
+GLuint thief_left_arm_texture;
+GLuint thief_right_arm_texture;
+GLuint thief_left_leg_texture;
+GLuint thief_right_leg_texture;
+GLuint police_head_texture;
+GLuint police_body_texture;
+GLuint police_left_arm_texture;
+GLuint police_right_arm_texture;
+GLuint police_left_leg_texture;
+GLuint police_right_leg_texture;
 GLuint road_texture;
-GLuint road_texture_horizon;
-GLuint apart_horizon;
+GLuint road_texture_special;
+GLuint apart_texture;
+GLuint store_texture;
+GLuint truck_texture;
+GLuint hurdle_texture;
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -103,7 +120,7 @@ Police police;
 
 // map객체
 Road road;
-int delete_num = 0;
+int delete_num = 40;
 int map_dir = 0;
 float MAP_SIZE = 40;
 
@@ -258,27 +275,54 @@ GLvoid drawScene() {
 	// 맵 그리기
 	glBindTexture(GL_TEXTURE_2D, road_texture);
 	for (int i = 0; i < roads.size(); ++i) {
+		if (roads.at(i).return_cross() != 100) {
+			glBindTexture(GL_TEXTURE_2D, road_texture_special);
+			glBindVertexArray(road_special_vao);
+		}
+		else {
+			glBindTexture(GL_TEXTURE_2D, road_texture);
+			glBindVertexArray(road_vao);
+		}
 		roads.at(i).draw(road_vao, modelLocation);
 	}
 
 	//장애물 그리기
 	for (int i = 0; i < ob.size(); ++i) {
-		if(dynamic_cast<Hurdle*>(ob[i]))
+		if (dynamic_cast<Hurdle*>(ob[i])) {
 			glBindVertexArray(hurdle_vao);
-		else
+			glBindTexture(GL_TEXTURE_2D, hurdle_texture);
+		}
+		else {
 			glBindVertexArray(truck_vao);
+			glBindTexture(GL_TEXTURE_2D, truck_texture);
+		}
 		ob.at(i)->draw(truck_vao, modelLocation, texture);
 	}
 	/* 사람 그리기 */
-	glBindTexture(GL_TEXTURE_2D, thief_texture);
 	Draw(); // 사람을 그리는 함수
 
 	/* 아파트 그리기 */
-	glBindTexture(GL_TEXTURE_2D, thief_texture);
+
+	int temp_dir = player.return_dir();
+	if (temp_dir == -1)
+		temp_dir = 3;
+	else if (temp_dir == -2)
+		temp_dir = 2;
+	else if (temp_dir == -3)
+		temp_dir = 1;
+
 	for (int i = 0; i < building.size(); ++i) {
-		if (building.at(i)->return_dir() != player.return_dir()) {
+		if (building.at(i)->return_dir() != temp_dir) {
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+		if (building.at(i)->return_what()) {
+			glBindTexture(GL_TEXTURE_2D, store_texture);
+			glBindVertexArray(store_vao);
+		}
+		else {
+			glBindTexture(GL_TEXTURE_2D, apart_texture);
+			glBindVertexArray(apart_vao);
 		}
 		building.at(i)->draw(apart_vao, modelLocation); // 아파트를 반투명하게 그림
 	}
@@ -305,12 +349,13 @@ GLvoid Timer_event(int value) {
 				ob.push_back(new Hurdle);
 			ob.at(i)->set_pos(0, -10 + i * -20, uid(dre));
 		}
-		/*for (int i = 0; i < 189; ++i) {
+		for (int i = 0; i < 200; ++i) {
 			building.push_back(new Apart);
-			if(i != 188)
-				building.at(i)->select_pos(0, -i, i);
-		}*/
+			building.at(i)->select_pos(0, -i, i, uid(dre));
+		}
 	}
+
+
 
 	if (delete_num >= MAP_SIZE) {
 		if (uid(dre) == 0)
@@ -339,6 +384,21 @@ GLvoid Timer_event(int value) {
 			else if(map_dir == 3)
 				ob.at(i)->set_pos((roads.at(roads.size() - 1).return_pos())[0] - max(30 * (i - temp_ob_num), 20), (roads.at(roads.size() - 1).return_pos())[2], uid(dre));
 		}
+
+		int temp_bd_num = building.size();
+		for (int i = temp_bd_num; i < 200 + temp_bd_num; ++i) {
+			building.push_back(new Apart);
+			building.at(i)->select_dir(map_dir);
+			if (map_dir == 0)
+				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] - (i - temp_bd_num + 10), i, uid(dre));
+			else if (map_dir == 1)
+				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0] + (i - temp_bd_num + 10), (roads.at(roads.size() - 1).return_pos())[2], i, uid(dre));
+			else if (map_dir == 2)
+				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0], (roads.at(roads.size() - 1).return_pos())[2] + (i - temp_bd_num + 10), i, uid(dre));
+			else if (map_dir == 3)
+				building.at(i)->select_pos((roads.at(roads.size() - 1).return_pos())[0] - (i - temp_bd_num + 10), (roads.at(roads.size() - 1).return_pos())[2], i, uid(dre));
+		}
+
 		delete_num = 0;
 	}
 
@@ -382,7 +442,7 @@ GLvoid Timer_event(int value) {
 	}
 
 	// 건물 삭제 검사
-	/*for (int i = 0; i < building.size(); ++i) {
+	for (int i = 0; i < building.size(); ++i) {
 		building.at(i)->player_distance(move_character);
 	}
 	for (int i = 0; i < building.size(); ++i) {
@@ -390,7 +450,7 @@ GLvoid Timer_event(int value) {
 			delete building[i];
 			building.erase(building.begin() + i);
 		}
-	}*/
+	}
 
 	// 충돌체크
 	for (int i = 0; i < ob.size(); ++i) {
@@ -423,9 +483,9 @@ GLvoid Timer_event(int value) {
 		}    
 		 
 		if (flip && !is_jump && !is_slide)
-			rad[0] -= 2;
+			rad[0] -= 2 * player.return_speed() * 10;
 		else if(!flip && !is_jump && !is_slide)
-			rad[0] += 2;
+			rad[0] += 2 * player.return_speed() * 10;
 	}
 
 	// 점프
@@ -438,10 +498,10 @@ GLvoid Timer_event(int value) {
 				is_jump = false;
 				rad[0] = 40;
 			}
-			move_character[1] += 0;
+			move_character[1] -= 0.01 * player.return_speed() * 10;
 		}
 		else {
-			move_character[1] += 0.09;
+			move_character[1] += 0.09 * player.return_speed() * 10;
 			if (move_character[1] >= 1)
 				jump_flip = true;
 			rad[0] = 80;
@@ -668,18 +728,35 @@ void Draw() {
 
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "transform"); //--- 버텍스 세이더에서 모델링 변환 위치 가져오기
 
-	player.draw(head_vao, body_vao, right_arm_vao, left_arm_vao, right_leg_vao, left_leg_vao, modelLocation, thief_texture);
+	player.draw(head_vao, body_vao, right_arm_vao, left_arm_vao, right_leg_vao, left_leg_vao, modelLocation, thief_head_texture, thief_body_texture
+	, thief_right_arm_texture, thief_left_arm_texture, thief_right_leg_texture, thief_left_leg_texture);
 	glBindTexture(GL_TEXTURE_2D, texture); //--- 텍스처 바인딩
-	police.draw(police_head_vao, police_body_vao, police_right_arm_vao, police_left_arm_vao, police_right_leg_vao, police_left_leg_vao, modelLocation, thief_texture);
-	
+	police.draw(police_head_vao, police_body_vao, police_right_arm_vao, police_left_arm_vao, police_right_leg_vao, police_left_leg_vao, modelLocation, police_head_texture
+	, police_body_texture, police_right_arm_texture, police_left_arm_texture, police_right_leg_texture, police_left_leg_texture);
 }
 
 void InitTexture()
 {
 	init_texture_file(texture, "image\\temp_city.jpg");
-	init_texture_file(thief_texture, "resource\\texture\\thief\\thief_head.png");
 	init_texture_file(road_texture, "resource\\texture\\ob\\road.png");
-	init_texture_file(road_texture_horizon, "resource\\texture\\ob\\road_horizon.png");
+	init_texture_file(road_texture_special, "resource\\texture\\ob\\road2.png");
+	init_texture_file(thief_head_texture, "resource\\texture\\thief\\thief_head.png");
+	init_texture_file(thief_body_texture, "resource\\texture\\thief\\thief_body.png");
+	init_texture_file(thief_right_arm_texture, "resource\\texture\\thief\\thief_rightarm.png");
+	init_texture_file(thief_left_arm_texture, "resource\\texture\\thief\\thief_leftarm.png");
+	init_texture_file(thief_right_leg_texture, "resource\\texture\\thief\\thief_rightleg.png");
+	init_texture_file(thief_left_leg_texture, "resource\\texture\\thief\\thief_leftleg.png");
+	init_texture_file(police_head_texture, "resource\\texture\\police\\police_head.png");
+	init_texture_file(police_body_texture, "resource\\texture\\police\\police_body.png");
+	init_texture_file(police_right_arm_texture, "resource\\texture\\police\\police_rightarm.png");
+	init_texture_file(police_left_arm_texture, "resource\\texture\\police\\police_leftarm.png");
+	init_texture_file(police_right_leg_texture, "resource\\texture\\police\\police_rightleg.png");
+	init_texture_file(police_left_leg_texture, "resource\\texture\\police\\police_leftleg.png");
+	init_texture_file(truck_texture, "resource\\texture\\ob\\truck.png");
+	init_texture_file(hurdle_texture, "resource\\texture\\ob\\fence.png");
+	init_texture_file(apart_texture, "resource\\texture\\ob\\apart.png");
+	init_texture_file(store_texture, "resource\\texture\\ob\\store.png");
+
 }
 
 
@@ -869,6 +946,9 @@ void Initvbovao()
 	Load_Object("resource\\ob\\road.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(road_vao, road_vbo);
 
+	Load_Object("resource\\ob\\road2.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	gen_vao(road_special_vao, road_special_vbo);
+
 	Load_Object("resource\\cube.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(vao, vbo);
 
@@ -880,6 +960,9 @@ void Initvbovao()
 
 	Load_Object("resource\\ob\\apart.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(apart_vao, apart_vbo);
+
+	Load_Object("resource\\ob\\store.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
+	gen_vao(store_vao, store_vbo);
 
 	Load_Object("resource\\police\\police_head.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(police_head_vao, police_head_vbo);
@@ -898,6 +981,7 @@ void Initvbovao()
 
 	Load_Object("resource\\police\\police_leftarm.obj", temp_vertices, temp_uvs, temp_normals, vertices, uvs, normals, vertexIndices, uvIndices, normalIndices);
 	gen_vao(police_left_arm_vao, police_left_arm_vbo);
+
 }
 
 // texture 파일 자동 읽기

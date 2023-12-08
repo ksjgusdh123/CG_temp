@@ -152,7 +152,7 @@ void Arm::transform(bool is_police) {
 				TR = glm::translate(TR, glm::vec3(-move[0], move[1], -move[2])); //--- x축으로 이동 행렬
 				TR = glm::rotate(TR, glm::radians(0.0f + rad[1]), glm::vec3(0.0, 1.0, 0.0)); //--- y축에 대하여 회전 행렬
 				TR = glm::translate(TR, glm::vec3(0.08, -0.15, -0.1)); //--- x축으로 이동 행렬
-				TR = glm::rotate(TR, glm::radians(rad[0] + 60), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
+				TR = glm::rotate(TR, glm::radians(rad[0] / 10 + 60), glm::vec3(1.0, 0.0, 0.0)); //--- x축에 대하여 회전 행렬
 				TR = glm::scale(TR, glm::vec3(HUMAN_SIZE, HUMAN_SIZE, HUMAN_SIZE));
 			}
 		}
@@ -284,13 +284,21 @@ Human::Human() {
 	slide = false;
 }
 
-void Human::draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, GLuint leg_texture) {
+void Human::draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation,
+	GLuint head_texture, GLuint body_texture, GLuint right_arm_texture, GLuint left_arm_texture, GLuint right_leg_texture, GLuint left_leg_texture){
+
+	glBindTexture(GL_TEXTURE_2D, head_texture);
 	head.draw(head_vao, modelLocation, false);
+	glBindTexture(GL_TEXTURE_2D, body_texture);
 	body.draw(body_vao, modelLocation, false);
+	glBindTexture(GL_TEXTURE_2D, right_arm_texture);
 	right_arm.draw(right_arm_vao, modelLocation, false);
+	glBindTexture(GL_TEXTURE_2D, left_arm_texture);
 	left_arm.draw(left_arm_vao, modelLocation, false);
-	right_leg.draw(right_leg_vao, modelLocation, leg_texture, false);
+	glBindTexture(GL_TEXTURE_2D, right_leg_texture);
+	right_leg.draw(right_leg_vao, modelLocation, right_leg_texture, false);
 	left_leg.draw(left_leg_vao, modelLocation, 0, false);
+	glBindTexture(GL_TEXTURE_2D, left_leg_texture);
 }
 
 void Human::move(float* move_amount, float* rad, bool pslide) {
@@ -436,6 +444,7 @@ void Human::position_setting(float* move_amount) {
 
 Road& Human::return_last() { return last; }
 
+float Human::return_speed() { return speed; }
 
 Police::Police() {
 	right_arm.check_right(0);
@@ -447,13 +456,19 @@ Police::Police() {
 		turn_point[i] = 100;
 }
 
-
-void Police::draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, GLuint texture) {
+void Police::draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation,
+	GLuint head_texture, GLuint body_texture, GLuint right_arm_texture, GLuint left_arm_texture, GLuint right_leg_texture, GLuint left_leg_texture){
+	glBindTexture(GL_TEXTURE_2D, head_texture);
 	head.draw(head_vao, modelLocation, true);
+	glBindTexture(GL_TEXTURE_2D, body_texture);
 	body.draw(body_vao, modelLocation, true);
+	glBindTexture(GL_TEXTURE_2D, right_arm_texture);
 	right_arm.draw(right_arm_vao, modelLocation, true);
+	glBindTexture(GL_TEXTURE_2D, left_arm_texture);
 	left_arm.draw(left_arm_vao, modelLocation, true);
-	right_leg.draw(right_leg_vao, modelLocation, texture, true);
+	glBindTexture(GL_TEXTURE_2D, right_leg_texture);
+	right_leg.draw(right_leg_vao, modelLocation, right_leg_texture, true);
+	glBindTexture(GL_TEXTURE_2D, left_leg_texture);
 	left_leg.draw(left_leg_vao, modelLocation, 0, true);
 }
 
@@ -568,93 +583,4 @@ void Police::get_rad(float* other_rad) {
 	for (int i = 0; i < 3; ++i)
 		rad[i] = other_rad[i];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

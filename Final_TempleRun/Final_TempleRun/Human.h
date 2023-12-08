@@ -59,7 +59,8 @@ class Human {
 	float light = 100;
 public:
 	Human();
-	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, GLuint leg_texture);
+	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, 
+		GLuint head_texture, GLuint body_texture, GLuint right_arm_texture, GLuint left_arm_texture, GLuint right_leg_texture, GLuint left_leg_texture);
 	void move(float* move_amount, float* rad, bool slide);
 	void turn(int i);
 	int return_dir();
@@ -74,6 +75,7 @@ public:
 	void set_road(Road&);
 	void position_setting(float*);
 	Road& return_last();
+	float return_speed();
 };
 
 class Police {
@@ -93,7 +95,8 @@ class Police {
 	bool flip = false;
 public:
 	Police();
-	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation, GLuint texture);
+	void draw(GLuint head_vao, GLuint body_vao, GLuint right_arm_vao, GLuint left_arm_vao, GLuint right_leg_vao, GLuint left_leg_vao, unsigned int modelLocation,
+		GLuint head_texture, GLuint body_texture, GLuint right_arm_texture, GLuint left_arm_texture, GLuint right_leg_texture, GLuint left_leg_texture);
 	void move(Human& player);
 	float get_speed();
 	void get_rad(float* rad);

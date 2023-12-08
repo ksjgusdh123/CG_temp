@@ -7,8 +7,9 @@ class Apart {
 	int dir = 0;
 	bool is_delete = false;
 	bool is_right;
+	bool is_store = false;
 public:
-	void select_pos(float, float, int);
+	void select_pos(float, float, int, int);
 	void transform();
 	void draw(GLuint, unsigned int);
 	void player_distance(float*);
@@ -16,6 +17,7 @@ public:
 	float* return_pos();
 	void select_dir(int map_dir);
 	int return_dir();
+	bool return_what();
 };
 
 extern std::vector<Apart*> building;
