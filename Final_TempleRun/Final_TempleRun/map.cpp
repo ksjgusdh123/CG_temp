@@ -58,7 +58,7 @@ void Road::draw(GLuint vao, unsigned int modelLocation) {
 		glDrawArrays(GL_TRIANGLES, 0, 264);
 }
 
-void Road::player_distance(float* player_pos, int* camera_dir) {
+void Road::player_distance(float* player_pos, float* camera_dir) {
 	if (pow((player_pos[2] + pos[2]), 2) + pow((player_pos[0] + pos[0]), 2) >= 100) {
 		if (dir == 0) {
 			if(player_pos[2] > -pos[2])

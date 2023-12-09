@@ -137,7 +137,7 @@ float move_character[3] = { 0, 0, 2 };
 float move_character_z = 0;
 float move_character_x = 0;
 float rad[3]{ 0, 540, 0 };
-int camera_dir[3]{0, 0, 5};
+float camera_dir[3]{0, 0, 5};
 bool flip = false;
 bool interupt = false;
 int temp_rad = 0;
@@ -495,7 +495,7 @@ GLvoid Timer_event(int value) {
 		}
 
 		// 도로 삭제 검사
-		if (roads.size() != 0) {
+		if (roads.size() != 0 && delete_num < MAP_SIZE) {
 			for (int i = 0; i < roads.size(); ++i) {
 				roads.at(i).player_distance(move_character, camera_dir);
 			}
@@ -738,6 +738,7 @@ GLvoid Timer_event(int value) {
 }
 
 GLvoid Keyboard(unsigned char key, int x, int y) {
+	// a, d, r, k, space, p빼고 디버깅 툴
 	if (!interupt) {
 		switch (key) {
 		case '-':
@@ -853,10 +854,6 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			channel[1]->stop();
 			channel[2]->stop();
 			ssystem->playSound(sound[0], 0, false, &channel[0]);
-			if (game_end) {
-				game_end = false;
-				game_main = true;
-			}
 			game_init();
 			break;
 		case ' ':
@@ -1040,9 +1037,9 @@ void turn_camera() {
 		switch (player.return_dir()) {
 		case 0:
 			if (rad[1] < temp_rad + 90 and interupt) {
-				camera_dir[0] += 1;
-				camera_dir[2] += 1;
-				rad[1] += 18;
+				camera_dir[0] += 0.5;
+				camera_dir[2] += 0.5;
+				rad[1] += 9;
 			}
 			else {
 				interupt = false;
@@ -1051,9 +1048,9 @@ void turn_camera() {
 			break;
 		case -1:
 			if (rad[1] < temp_rad + 90 and interupt) {
-				camera_dir[0] += 1;
-				camera_dir[2] -= 1;
-				rad[1] += 18;
+				camera_dir[0] += 0.5;
+				camera_dir[2] -= 0.5;
+				rad[1] += 9;
 			}
 			else {
 				interupt = false;
@@ -1062,9 +1059,9 @@ void turn_camera() {
 		case -2:
 		case 2:
 			if (rad[1] < temp_rad + 90 and interupt) {
-				camera_dir[0] -= 1;
-				camera_dir[2] -= 1;
-				rad[1] += 18;
+				camera_dir[0] -= 0.5;
+				camera_dir[2] -= 0.5;
+				rad[1] += 9;
 			}
 			else {
 				interupt = false;
@@ -1073,9 +1070,9 @@ void turn_camera() {
 		case -3:
 		case 1:
 			if (rad[1] < temp_rad + 90 and interupt) {
-				camera_dir[0] -= 1;
-				camera_dir[2] += 1;
-				rad[1] += 18;
+				camera_dir[0] -= 0.5;
+				camera_dir[2] += 0.5;
+				rad[1] += 9;
 			}
 			else {
 				interupt = false;
@@ -1087,9 +1084,9 @@ void turn_camera() {
 		switch (player.return_dir()) {
 		case 0:
 			if (rad[1] > temp_rad - 90 and interupt) {
-				camera_dir[0] -= 1;
-				camera_dir[2] += 1;
-				rad[1] -= 18;
+				camera_dir[0] -= 0.5;
+				camera_dir[2] += 0.5;
+				rad[1] -= 9;
 			}
 			else {
 				interupt = false;
@@ -1098,9 +1095,9 @@ void turn_camera() {
 			break;
 		case 1:
 			if (rad[1] > temp_rad - 90 and interupt) {
-				camera_dir[0] -= 1;
-				camera_dir[2] -= 1;
-				rad[1] -= 18;
+				camera_dir[0] -= 0.5;
+				camera_dir[2] -= 0.5;
+				rad[1] -= 9;
 			}
 			else {
 				interupt = false;
@@ -1109,9 +1106,9 @@ void turn_camera() {
 		case 2:
 		case -2:
 			if (rad[1] > temp_rad - 90 and interupt) {
-				camera_dir[0] += 1;
-				camera_dir[2] -= 1;
-				rad[1] -= 18;
+				camera_dir[0] += 0.5;
+				camera_dir[2] -= 0.5;
+				rad[1] -= 9;
 			}
 			else {
 				interupt = false;
@@ -1120,9 +1117,9 @@ void turn_camera() {
 		case 3:
 		case -1:
 			if (rad[1] > temp_rad - 90 and interupt) {
-				camera_dir[0] += 1;
-				camera_dir[2] += 1;
-				rad[1] -= 18;
+				camera_dir[0] += 0.5;
+				camera_dir[2] += 0.5;
+				rad[1] -= 9;
 			}
 			else {
 				interupt = false;

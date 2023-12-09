@@ -10,7 +10,7 @@ public:
 	void select_pos(float, float);
 	void transform();
 	void draw(GLuint, unsigned int);
-	void player_distance(float*, int*);
+	void player_distance(float*, float*);
 	bool return_is_delete();
 	float* return_pos();
 	void select_dir(int map_dir);
