@@ -236,14 +236,14 @@ bool Hurdle::collision(float* player_pos, Human& player) {
 	if (!is_collide) {
 		if (dir == 0 && player.return_dir() == 0) {
 			if (flip) {
-				if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (player_pos[0] < pos[0] - 0.75 && !player.return_jump())) {
+				if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (temp_player_pos_x > pos[0] - 0.75 && !player.return_jump())) {
 					std::cout << "Á¢ÃËhurdle" << std::endl;
 					is_collide = true;
 					player.set_speed(DOWN_SPEED);
 				}
 			}
 			else {
-				if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (player_pos[0] > pos[0] + 0.75 && !player.return_jump())) {
+				if ((temp_player_pos_z >= pos[2] - 0.5 && temp_player_pos_z <= pos[2] + 0.5) && (temp_player_pos_x < pos[0] + 0.75 && !player.return_jump())) {
 					std::cout << "Á¢ÃËhurdle" << std::endl;
 					is_collide = true;
 					player.set_speed(DOWN_SPEED);

@@ -850,6 +850,8 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			break;
 		case 'r':
 			channel[0]->stop();
+			channel[1]->stop();
+			channel[2]->stop();
 			ssystem->playSound(sound[0], 0, false, &channel[0]);
 			if (game_end) {
 				game_end = false;
