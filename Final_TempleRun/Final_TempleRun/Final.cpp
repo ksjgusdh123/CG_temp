@@ -87,6 +87,16 @@ GLuint store_texture;
 GLuint truck_texture;
 GLuint hurdle_texture;
 GLuint red_texture;
+GLuint start_texture;
+GLuint end_texture;
+GLuint morning_texture;
+GLuint morning_horizon_texture;
+GLuint afternoon_texture;
+GLuint afternoon_horizon_texture;
+GLuint night_texture;
+GLuint night_horizon_texture;
+GLuint early_morning_texture;
+GLuint early_morning_horizon_texture;
 
 /*OPGL관렴 함수*/
 GLvoid drawScene();
@@ -158,6 +168,8 @@ bool is_right_button = false;
 bool is_left_button = false;
 // 임시배경 큐브
 GLuint vao, vbo[3];
+float map_speed = 0.0005;
+float map_pos[3]{ 0 };
 
 // 카메라 각도 임시 조작
 float camera[3]{ 0 };
@@ -229,7 +241,6 @@ void game_init() {
 	space = false;
 	ambient_down = true;
 	ambient_state = 0;
-
 }
 
 void sound_init() {
@@ -294,22 +305,55 @@ GLvoid drawScene() {
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
-		glBindTexture(GL_TEXTURE_2D, road_texture);
+		glBindTexture(GL_TEXTURE_2D, start_texture);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 12, 6);
 	}
 	else if (!game_end) {
 		// 임시 배경
+		map_pos[0] += map_speed;
+
 		glDisable(GL_DEPTH_TEST);
-		temp_back_ground = glm::translate(temp_back_ground, glm::vec3(0, 0, -2));
+		temp_back_ground = glm::translate(temp_back_ground, glm::vec3(map_pos[0], 0, -2));
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniform1f(ambient, 1);
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 12, 6);
+		for (int i = 0; i < 20; ++i) {
+			temp_back_ground = glm::mat4(1.0f);
+			temp_back_ground = glm::translate(temp_back_ground, glm::vec3(map_pos[0] - i * 2 + 0.015 * i, 0, -2));
+			if (ambient_state == 0) {
+				if (i % 2 == 0)
+					glBindTexture(GL_TEXTURE_2D, morning_texture);
+				else 
+					glBindTexture(GL_TEXTURE_2D, morning_horizon_texture);
+			}
+			else if (ambient_state == 1) {
+				if(i % 2 == 0)
+					glBindTexture(GL_TEXTURE_2D, afternoon_texture);
+				else 
+					glBindTexture(GL_TEXTURE_2D, afternoon_horizon_texture);
+			}
+			else if (ambient_state == 2 || ambient_state == 3) {
+				if(i % 2 == 0)
+					glBindTexture(GL_TEXTURE_2D, night_texture);
+				else
+					glBindTexture(GL_TEXTURE_2D, night_horizon_texture);
+			}
+			else if (ambient_state == 4) {
+				if (i % 2 == 0)
+					glBindTexture(GL_TEXTURE_2D, early_morning_texture);
+				else
+					glBindTexture(GL_TEXTURE_2D, early_morning_horizon_texture);
+			}
+
+			glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
+			glDrawArrays(GL_TRIANGLES, 12, 6);
+		}
 
 		glEnable(GL_DEPTH_TEST);
+		glUniform1f(ambient, ambient_amount);
 
 		view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
@@ -415,7 +459,7 @@ GLvoid drawScene() {
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp_back_ground)); //--- modelTransform 변수에 변환 값 적용하기
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, end_texture);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 12, 6);
 	}
@@ -534,6 +578,8 @@ GLvoid Timer_event(int value) {
 			float temp = police.get_speed();
 			player.recover_speed(temp);
 			player.set_speed(0.0001);
+			if(ambient_state != 2)
+				map_pos[0] = 0;
 			if (ambient_down) {
 				if (ambient_state == 0) {
 					ambient_amount = 0.5;
@@ -543,8 +589,18 @@ GLvoid Timer_event(int value) {
 					ambient_amount = 0.0;
 					ambient_state = 2;
 				}
-				else if (ambient_state == 2)
-					ambient_down = false;
+				else if (ambient_state == 2) {
+					ambient_amount = 0.0;
+					ambient_state = 3;
+				}
+				else if (ambient_state == 3) {
+					ambient_amount = 0.5;
+					ambient_state = 4;
+				}
+				else if (ambient_state == 4) {
+					ambient_amount = 1;
+					ambient_state = 0;
+				}
 			}
 			else {
 				if (ambient_state == 2) {
@@ -673,6 +729,12 @@ GLvoid Timer_event(int value) {
 					break;
 				case 2:
 					ambient_amount = 0;
+					break;
+				case 3:
+					ambient_amount = 0;
+					break;
+				case 4:
+					ambient_amount = 0.5;
 					break;
 				}
 				space = false;
@@ -882,6 +944,12 @@ void KeyUpCallback(unsigned char key, int x, int y) {
 			case 2:
 				ambient_amount = 0;
 				break;
+			case 3:
+				ambient_amount = 0;
+				break;
+			case 4:
+				ambient_amount = 0.5;
+				break;
 			}
 		}
 		space = false;
@@ -966,6 +1034,17 @@ void InitTexture()
 	init_texture_file(apart_texture, "resource\\texture\\ob\\apart.png");
 	init_texture_file(store_texture, "resource\\texture\\ob\\store.png");
 	init_texture_file(red_texture, "resource\\texture\\red.png");
+	init_texture_file(start_texture, "resource\\back\\시작화면.png");
+	init_texture_file(end_texture, "resource\\back\\종료화면.png");
+	init_texture_file(morning_texture, "resource\\back\\morning.jpg");
+	init_texture_file(morning_horizon_texture, "resource\\back\\morning_horizon.png");
+	init_texture_file(afternoon_texture, "resource\\back\\afternoon.jpg");
+	init_texture_file(afternoon_horizon_texture, "resource\\back\\afternoon_horizon.png");
+	init_texture_file(night_texture, "resource\\back\\night.jpg");
+	init_texture_file(night_horizon_texture, "resource\\back\\night_horizon.png");
+	init_texture_file(early_morning_texture, "resource\\back\\early_morning.jpg");
+	init_texture_file(early_morning_horizon_texture, "resource\\back\\early_morning_horizon.jpg");
+
 
 }
 
@@ -1195,10 +1274,10 @@ void Initvbovao()
 }
 
 // texture 파일 자동 읽기
-void init_texture_file(GLuint& texture, const char* file) {
+void init_texture_file(GLuint& ftexture, const char* file) {
 	int widthImage, heightImage, numberOfChannel;
-	glGenTextures(1, &texture); //--- 텍스처 생성
-	glBindTexture(GL_TEXTURE_2D, texture); //--- 텍스처 바인딩
+	glGenTextures(1, &ftexture); //--- 텍스처 생성
+	glBindTexture(GL_TEXTURE_2D, ftexture); //--- 텍스처 바인딩
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
