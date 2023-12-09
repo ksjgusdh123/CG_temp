@@ -658,6 +658,11 @@ GLvoid Timer_event(int value) {
 				game_end = true;
 				ambient_state = 0;
 				ambient_amount = 1;
+				interupt = false;
+				is_right_button = false;
+				is_left_button = false;
+				is_a_button = false;
+			
 				channel[0]->stop();
 				ssystem->playSound(sound[2], 0, false, &channel[0]);
 			}
@@ -881,13 +886,15 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 			player.turn(1);
 			temp_rad = rad[1];
 			is_a_button = true;
-			interupt = true;
+			if(!game_end)
+				interupt = true;
 			break;
 		case 'd':
 			player.turn(0);
 			temp_rad = rad[1];
 			is_a_button = false;
-			interupt = true;
+			if(!game_end)
+				interupt = true;
 			break;
 		case 'y':
 			rad[1] += 10;
