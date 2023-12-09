@@ -154,6 +154,8 @@ bool change = false;
 bool game_end = false;
 bool game_main = true;
 bool is_first = false;
+bool is_right_button = false;
+bool is_left_button = false;
 // 임시배경 큐브
 GLuint vao, vbo[3];
 
@@ -403,6 +405,7 @@ GLvoid drawScene() {
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TR)); //--- modelTransform 변수에 변환 값 적용하기
 		glBindVertexArray(vao);
+		glUniform1f(ambient, 1);
 		glDrawArrays(GL_TRIANGLES, 12, 6);
 
 	}
@@ -682,6 +685,44 @@ GLvoid Timer_event(int value) {
 			}
 		}
 
+		if (is_right_button) {
+			switch (player.return_dir()) {
+			case 0:
+				move_character[0] -= 0.03;
+				break;
+			case -1:
+			case 3:
+				move_character[2] += 0.03;
+				break;
+			case 1:
+			case -3:
+				move_character[2] -= 0.03;
+				break;
+			case 2:
+			case -2:
+				move_character[0] += 0.03;
+				break;
+			}
+		}
+		else if (is_left_button) {
+			switch (player.return_dir()) {
+			case 0:
+				move_character[0] += 0.03;
+				break;
+			case -1:
+			case 3:
+				move_character[2] -= 0.03;
+				break;
+			case 1:
+			case -3:
+				move_character[2] += 0.03;
+				break;
+			case 2:
+			case -2:
+				move_character[0] -= 0.03;
+				break;
+			}
+		}
 
 		move_character[1] -= 0.05;
 		player.road_check(move_character);
@@ -850,42 +891,10 @@ void KeyUpCallback(unsigned char key, int x, int y) {
 
 void SpecialKeyboard(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT) {
-		switch (player.return_dir()) {
-		case 0:
-			move_character[0] -= 0.1;
-			break;
-		case -1:
-		case 3:
-			move_character[2] += 0.1;
-			break;
-		case 1:
-		case -3:
-			move_character[2] -= 0.1;
-			break;
-		case 2:
-		case -2:
-			move_character[0] += 0.1;
-			break;
-		}
+		is_right_button = true;
 	}
 	else if (key == GLUT_KEY_LEFT) {
-		switch (player.return_dir()) {
-		case 0:
-			move_character[0] += 0.1;
-			break;
-		case -1:
-		case 3:
-			move_character[2] -= 0.1;
-			break;
-		case 1:
-		case -3:
-			move_character[2] += 0.1;
-			break;
-		case 2:
-		case -2:
-			move_character[0] -= 0.1;
-			break;
-		}
+		is_left_button = true;
 	}
 	else if (key == GLUT_KEY_DOWN) {
 		if (!is_jump) {
@@ -913,6 +922,12 @@ void specialKeyUpCallback(int key, int x, int y) {
 		is_slide = false;
 		is_first = false;
 		rad[0] = 0;
+	}
+	else if (key == GLUT_KEY_LEFT) {
+		is_left_button = false;
+	}
+	else if (key == GLUT_KEY_RIGHT) {
+		is_right_button = false;
 	}
 }
 
